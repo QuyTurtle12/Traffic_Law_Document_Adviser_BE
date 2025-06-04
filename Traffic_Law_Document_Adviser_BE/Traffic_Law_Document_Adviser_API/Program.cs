@@ -1,10 +1,13 @@
-using System.Reflection;
+using DataAccess.DTOs.NewsDTOs;
 using DataAccess.Entities;
 using DataAccess.IRepositories;
+using DataAccess.IServices;
 using DataAccess.Repositories;
+using DataAccess.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Product_Sale_API.Middleware;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +17,8 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddHttpClient();
 
 // Register Cors
 builder.Services.AddCors(options =>
@@ -58,6 +63,14 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddScoped<IUOW, UOW>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 //builder.Services.AddScoped<IProductService, ProductService>();
+
+builder.Services.AddScoped<INewsService, NewsService>();
+
+builder.Services.AddAutoMapper(config =>
+{
+    config.CreateMap<News, GetNewsDTO>();
+    config.CreateMap<AddNewsDTO, News>();
+});
 
 var app = builder.Build();
 
