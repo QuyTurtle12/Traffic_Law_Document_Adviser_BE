@@ -1,4 +1,6 @@
 using System.Reflection;
+using BusinessLogic.IServices;
+using BusinessLogic.Services;
 using DataAccess.Entities;
 using DataAccess.IRepositories;
 using DataAccess.Repositories;
@@ -57,7 +59,7 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 // Register Repositories and Services
 builder.Services.AddScoped<IUOW, UOW>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-//builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IDocumentTagService, DocumentTagService>();
 
 var app = builder.Build();
 
