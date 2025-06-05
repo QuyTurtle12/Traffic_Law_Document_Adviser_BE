@@ -65,9 +65,9 @@ namespace BusinessLogic.Services
                 Token = tokenString,
                 ExpiresAt = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes),
                 UserId = newUser.Id.ToString(),
-                Role = newUser.Role.ToString(),
-                FullName = newUser.FullName,
-                Email = newUser.Email
+                Role = RoleConstants.User,
+                FullName = newUser.FullName!,
+                Email = newUser.Email!
             };
         }
 
@@ -75,8 +75,8 @@ namespace BusinessLogic.Services
         {
             // Look up user by email
             var userRepo = _unitOfWork.GetRepository<User>();
-            var existing = userRepo.Entities.FirstOrDefault(u => u.Email == dto.Email);
-            if (existing == null)
+            var user = userRepo.Entities.FirstOrDefault(u => u.Email == dto.Email);
+            if (user == null)
                 throw new ErrorException(
                   StatusCodes.Status401Unauthorized,
                   "INVALID_CREDENTIALS",
@@ -84,7 +84,7 @@ namespace BusinessLogic.Services
                 );
 
             // Verify password
-            bool validPassword = PasswordHasher.Verify(dto.Password, existing.PasswordHash!);
+            bool validPassword = PasswordHasher.Verify(dto.Password, user.PasswordHash!);
             if (!validPassword)
                 throw new ErrorException(
                   StatusCodes.Status401Unauthorized,
@@ -93,7 +93,7 @@ namespace BusinessLogic.Services
                 );
 
             // Check if user is active
-            if (!existing.IsActive)
+            if (!user.IsActive)
                 throw new ErrorException(
                   StatusCodes.Status403Forbidden,
                   "USER_INACTIVE",
@@ -101,16 +101,16 @@ namespace BusinessLogic.Services
                 );
 
             // Generate JWT
-            var tokenString = GenerateJwtToken(existing);
+            var tokenString = GenerateJwtToken(user);
 
             return new AuthResponseDTO
             {
                 Token = tokenString,
                 ExpiresAt = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes),
-                UserId = existing.Id.ToString(),
-                Role = existing.Role.ToString(),
-                FullName = existing.FullName!,
-                Email = existing.Email!
+                UserId = user.Id.ToString(),
+                Role = RoleConstants.ToRoleName(user.Role!.Value),
+                FullName = user.FullName!,
+                Email = user.Email!
             };
         }
 
@@ -122,18 +122,18 @@ namespace BusinessLogic.Services
             // Create claims: subject = user.Id, email, role
             var claims = new[]
             {
-        new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-        new Claim(JwtRegisteredClaimNames.Email, user.Email!),
-        new Claim(ClaimTypes.Role, RoleConstants.ToRoleName(user.Role!.Value)),
-        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-      };
+                new Claim(JwtRegisteredClaimNames.Sub,   user.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Email, user.Email!),
+                new Claim(ClaimTypes.Role,                RoleConstants.ToRoleName(user.Role!.Value)),
+                new Claim(JwtRegisteredClaimNames.Jti,   Guid.NewGuid().ToString())
+            };
 
             var token = new JwtSecurityToken(
-              issuer: _jwtSettings.Issuer,
-              audience: _jwtSettings.Audience,
-              claims: claims,
-              expires: DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes),
-              signingCredentials: creds
+                issuer: _jwtSettings.Issuer,
+                audience: _jwtSettings.Audience,
+                claims: claims,
+                expires: DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes),
+                signingCredentials: creds
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);

@@ -1,5 +1,7 @@
 ﻿using BusinessLogic.IServices;
+using DataAccess.Constant;
 using DataAccess.DTOs.AuthDTOs;
+using DataAccess.ResponseModel;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Traffic_Law_Document_Adviser_API.Controllers
@@ -24,19 +26,17 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterUserDTO dto)
         {
+            // ModelState is automatically validated by ASP.NET Core because of [ApiController].
             var result = await _authService.RegisterAsync(dto);
-            return Ok(new
-            {
-                token = result.Token,
-                expires = result.ExpiresAt,
-                user = new
-                {
-                    result.UserId,
-                    result.FullName,
-                    result.Email,
-                    result.Role
-                }
-            });
+
+            var response = new BaseResponseModel<AuthResponseDTO>(
+                statusCode: StatusCodes.Status200OK,
+                code: ResponseCodeConstants.SUCCESS,
+                data: result,
+                message: "User registered successfully."
+            );
+
+            return Ok(response);
         }
 
         /// <summary>
@@ -48,18 +48,15 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
         public async Task<IActionResult> Login([FromBody] LoginDTO dto)
         {
             var result = await _authService.LoginAsync(dto);
-            return Ok(new
-            {
-                token = result.Token,
-                expires = result.ExpiresAt,
-                user = new
-                {
-                    result.UserId,
-                    result.FullName,
-                    result.Email,
-                    result.Role
-                }
-            });
+
+            var response = new BaseResponseModel<AuthResponseDTO>(
+                statusCode: StatusCodes.Status200OK,
+                code: ResponseCodeConstants.SUCCESS,
+                data: result,
+                message: "Login successful."
+            );
+
+            return Ok(response);
         }
     }
 }
