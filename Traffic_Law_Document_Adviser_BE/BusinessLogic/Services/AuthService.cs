@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using BusinessLogic.Helpers;
 using BusinessLogic.IServices;
+using DataAccess.Constant;
 using DataAccess.DTOs.AuthDTOs;
 using DataAccess.Entities;
 using DataAccess.ExceptionCustom;
@@ -48,7 +49,7 @@ namespace BusinessLogic.Services
                 FullName = dto.FullName,
                 Email = dto.Email,
                 PasswordHash = PasswordHasher.Hash(dto.Password),
-                Role = 1,   // 1 = “User"
+                Role = RoleConstants.UserValue,
                 IsActive = true
             };
 
@@ -123,7 +124,7 @@ namespace BusinessLogic.Services
             {
         new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
         new Claim(JwtRegisteredClaimNames.Email, user.Email!),
-        new Claim(ClaimTypes.Role, user.Role.ToString()),
+        new Claim(ClaimTypes.Role, RoleConstants.ToRoleName(user.Role!.Value)),
         new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
       };
 
