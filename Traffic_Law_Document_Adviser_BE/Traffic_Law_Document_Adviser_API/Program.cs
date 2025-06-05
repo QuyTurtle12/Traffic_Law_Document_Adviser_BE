@@ -1,10 +1,17 @@
-using System.Reflection;
+using BusinessLogic.IServices;
+using BusinessLogic.Services;
+using DataAccess.DTOs;
+using DataAccess.DTOs.AuthDTOs;
 using DataAccess.Entities;
 using DataAccess.IRepositories;
 using DataAccess.Repositories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Product_Sale_API.Middleware;
+using System.Reflection;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -54,9 +61,40 @@ builder.Services.AddSwaggerGen(options =>
 // Register AutoMapper
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
+// Bind JwtSettings from appsettings.json
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
+
+// Add Authentication + JWT Bearer
+var jwtSection = builder.Configuration.GetSection("JwtSettings");
+var jwtConfig = jwtSection.Get<JwtSettings>();
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.RequireHttpsMetadata = true;
+    options.SaveToken = true;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtConfig.Issuer,
+        ValidAudience = jwtConfig.Audience,
+        IssuerSigningKey = new SymmetricSecurityKey(
+        Encoding.UTF8.GetBytes(jwtConfig.Key))
+    };
+});
+
+
 // Register Repositories and Services
 builder.Services.AddScoped<IUOW, UOW>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped<IAuthService, AuthService>();
 //builder.Services.AddScoped<IProductService, ProductService>();
 
 var app = builder.Build();
@@ -72,6 +110,7 @@ app.UseHttpsRedirection();
 
 app.UseCors("AllowAllOrigins");
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 //app.UseMiddleware<PermissionHandlingMiddleware>();
