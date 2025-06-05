@@ -1,5 +1,6 @@
-using BusinessLogic.IServices;
+﻿using BusinessLogic.IServices;
 using BusinessLogic.Services;
+using DataAccess.Constant;
 using DataAccess.DTOs;
 using DataAccess.DTOs.AuthDTOs;
 using DataAccess.Entities;
@@ -89,7 +90,21 @@ builder.Services.AddAuthentication(options =>
         Encoding.UTF8.GetBytes(jwtConfig.Key))
     };
 });
+// 3.1. Configure role‐based policies
+builder.Services.AddAuthorization(options =>
+{
+    // Only Admin can do certain things
+    options.AddPolicy("RequireAdminRole", policy =>
+      policy.RequireRole(RoleConstants.Admin));
 
+    // Expert OR Admin
+    options.AddPolicy("RequireExpertOrAdmin", policy =>
+      policy.RequireRole(RoleConstants.Expert, RoleConstants.Admin));
+
+    // Any authenticated User (including Expert/Admin)
+    options.AddPolicy("RequireAnyUserRole", policy =>
+      policy.RequireRole(RoleConstants.User, RoleConstants.Expert, RoleConstants.Admin));
+});
 
 // Register Repositories and Services
 builder.Services.AddScoped<IUOW, UOW>();
