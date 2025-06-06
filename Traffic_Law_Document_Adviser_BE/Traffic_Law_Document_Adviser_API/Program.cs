@@ -1,4 +1,5 @@
 ﻿using BusinessLogic.IServices;
+using BusinessLogic.MappingProfiles;
 using BusinessLogic.Services;
 using DataAccess.Constant;
 using DataAccess.DTOs;
@@ -61,6 +62,7 @@ builder.Services.AddSwaggerGen(options =>
 
 // Register AutoMapper
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+builder.Services.AddAutoMapper(typeof(UserProfile).Assembly);
 
 // Bind JwtSettings from appsettings.json
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
@@ -110,6 +112,8 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddScoped<IUOW, UOW>();
 builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserService, UserService>();
+
 //builder.Services.AddScoped<IProductService, ProductService>();
 
 var app = builder.Build();
