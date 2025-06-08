@@ -27,14 +27,12 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
                 return NotFound();
             return Ok(chatHistory);
         }
-
         [HttpPost]
         public async Task<IActionResult> CreateChatHistoryAsync([FromBody] PostChatHistoryDto postChatHistoryDto)
         {
             await _chatHistoryService.CreateChatHistoryAsync(postChatHistoryDto);
             return Ok("Create success");
         }
-
         [HttpDelete("{chatId}")]
         public async Task<IActionResult> DeleteChatHistoryAsync(Guid chatId)
         {

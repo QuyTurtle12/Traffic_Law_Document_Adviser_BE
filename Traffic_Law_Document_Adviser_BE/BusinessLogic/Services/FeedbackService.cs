@@ -14,7 +14,6 @@ namespace BusinessLogic.Services
     {
         private readonly IMapper _mapper;
         private readonly IUOW _unitOfWork;
-
         public FeedbackService(IMapper mapper, IUOW uow)
         {
                     _mapper = mapper;
@@ -68,10 +67,11 @@ namespace BusinessLogic.Services
             
             Feedback feedback = await _unitOfWork.GetRepository<Feedback>()
                 .Entities
-                .Where(f => Guid.Equals(f.Id, putFeedbackDto.Id))
+                .Where(f => Guid.Equals(f.Id, putFeedbackDto.Id) && f.DeletedTime == null)
                 .FirstOrDefaultAsync();
 
-            if (feedback == null) return;
+            if (feedback == null) 
+                throw new CoreException("Feedback not found or has been deleted.", "FEEDBACK_NOT_FOUND", StatusCodes.Status404NotFound); ;
 
             feedback = _mapper.Map(putFeedbackDto, feedback);
             _unitOfWork.GetRepository<Feedback>().Update(feedback);

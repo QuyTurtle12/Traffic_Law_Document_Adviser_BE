@@ -2,7 +2,9 @@
 using BusinessLogic.IServices;
 using DataAccess.DTOs.ChatHistoryDTOs;
 using DataAccess.Entities;
+using DataAccess.ExceptionCustom;
 using DataAccess.IRepositories;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace BusinessLogic.Services
@@ -17,7 +19,6 @@ namespace BusinessLogic.Services
             _mapper = mapper;
             _unitOfWork = uow;
         }
-
         public async Task CreateChatHistoryAsync(PostChatHistoryDto postChatHistoryDto)
         {
             ChatHistory newChatHistory = _mapper.Map<ChatHistory>(postChatHistoryDto);
@@ -25,7 +26,6 @@ namespace BusinessLogic.Services
                 .InsertAsync(newChatHistory);
             await _unitOfWork.SaveAsync();
         }
-
         public async Task DeleteChatHistoryAsync(Guid chatId)
         {
             ChatHistory chatHistory = await _unitOfWork.GetRepository<ChatHistory>()
@@ -33,12 +33,12 @@ namespace BusinessLogic.Services
                 .Where(c => Guid.Equals(c.Id, chatId))
                 .FirstOrDefaultAsync();
 
-            if(chatHistory == null) return;
+            if(chatHistory == null)
+                throw new CoreException("Chat history not found or has been deleted.", "CHATHISTORY_NOT_FOUND", StatusCodes.Status404NotFound);
 
             _unitOfWork.GetRepository<ChatHistory>().Delete(chatHistory);
             await _unitOfWork.SaveAsync();
         }
-
         public async Task<GetChatHistoryDto> GetChatHistoryAsync(Guid chatId)
         {
             ChatHistory chatHistory = await _unitOfWork.GetRepository<ChatHistory>()
@@ -48,7 +48,6 @@ namespace BusinessLogic.Services
 
             return chatHistory == null ? null : _mapper.Map<GetChatHistoryDto>(chatHistory);
         }
-
         public async Task<IEnumerable<GetChatHistoryDto>> GetChatHistoryListAsync(Guid userId, int page, int pageSize)
         {
             IEnumerable<ChatHistory> chatHistoryList = await _unitOfWork.GetRepository<ChatHistory>()
