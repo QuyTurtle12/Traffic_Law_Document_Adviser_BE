@@ -135,6 +135,7 @@ builder.Services.AddAutoMapper(config =>
 //builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ILawDocumentService, LawDocumentService>();
 builder.Services.AddScoped<IDocumentCategoryService, DocumentCategoryService>();
+builder.Services.AddScoped<IDocumentTagService, DocumentTagService>();
 
 var app = builder.Build();
 

@@ -50,11 +50,7 @@ namespace Product_Sale_API.Middleware
             };
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="context"></param>
-        /// <param name="unitOfWork"></param>
+
         //public async Task Invoke(HttpContext context, IUOW unitOfWork)
         //{
         //    _logger.LogDebug("Entered PermissionHandlingMiddleware.Invoke");
