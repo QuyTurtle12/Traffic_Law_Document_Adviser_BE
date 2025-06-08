@@ -5,6 +5,9 @@ using DataAccess.Constant;
 using DataAccess.DTOs;
 using DataAccess.DTOs.AuthDTOs;
 using DataAccess.DTOs.NewsDTOs;
+using System.Reflection;
+using BusinessLogic.IServices;
+using BusinessLogic.Services;
 using DataAccess.Entities;
 using DataAccess.IRepositories;
 using DataAccess.IServices;
@@ -119,7 +122,8 @@ builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepositor
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 
-//builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<IChatHistoryService, ChatHistoryService>();
+builder.Services.AddScoped<IFeedbackService, FeedbackService>();
 
 builder.Services.AddScoped<INewsService, NewsService>();
 
