@@ -4,10 +4,13 @@ using BusinessLogic.Services;
 using DataAccess.Constant;
 using DataAccess.DTOs;
 using DataAccess.DTOs.AuthDTOs;
+using DataAccess.DTOs.NewsDTOs;
 using DataAccess.Entities;
 using DataAccess.IRepositories;
+using DataAccess.IServices;
 using DataAccess.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using DataAccess.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -23,6 +26,8 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddHttpClient();
 
 // Register Cors
 builder.Services.AddCors(options =>
@@ -115,6 +120,14 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 
 //builder.Services.AddScoped<IProductService, ProductService>();
+
+builder.Services.AddScoped<INewsService, NewsService>();
+
+builder.Services.AddAutoMapper(config =>
+{
+    config.CreateMap<News, GetNewsDTO>();
+    config.CreateMap<AddNewsDTO, News>();
+});
 
 var app = builder.Build();
 
