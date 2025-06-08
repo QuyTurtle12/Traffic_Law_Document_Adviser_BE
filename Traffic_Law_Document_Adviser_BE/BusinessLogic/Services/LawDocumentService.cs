@@ -113,9 +113,8 @@ namespace BusinessLogic.Services
                 throw new ErrorException(StatusCodes.Status400BadRequest, ResponseCodeConstants.BADREQUEST, "Law document data is required!");
             }
 
-
             LawDocument lawDocument = _mapper.Map<LawDocument>(lawDocumentDTO);
-            lawDocument.CreatedBy = "system";
+            lawDocument.CreatedBy = "System";
             lawDocument.CreatedTime = DateTime.Now;
 
             await _unitOfWork.GetRepository<LawDocument>().InsertAsync(lawDocument);
@@ -132,7 +131,7 @@ namespace BusinessLogic.Services
             }
 
             LawDocument lawDocument = _mapper.Map(lawDocumentDTO, existingLawDocument);
-            lawDocument.LastUpdatedBy = "system";
+            lawDocument.LastUpdatedBy = "System";
             lawDocument.LastUpdatedTime = DateTime.Now;
 
             repository.Update(existingLawDocument);
@@ -160,8 +159,10 @@ namespace BusinessLogic.Services
             {
                 throw new ErrorException(StatusCodes.Status404NotFound, ResponseCodeConstants.BADREQUEST, "Law document not found!");
             }
-            existingLawDocument.DeletedBy = "system";
+            existingLawDocument.DeletedBy = "System";
             existingLawDocument.DeletedTime = DateTime.Now;
+            existingLawDocument.LastUpdatedBy = "System";
+            existingLawDocument.LastUpdatedTime = DateTime.Now;
 
             repository.Update(existingLawDocument);
             await _unitOfWork.SaveAsync();
