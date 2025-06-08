@@ -132,6 +132,9 @@ builder.Services.AddAutoMapper(config =>
     config.CreateMap<News, GetNewsDTO>();
     config.CreateMap<AddNewsDTO, News>();
 });
+//builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<ILawDocumentService, LawDocumentService>();
+builder.Services.AddScoped<IDocumentCategoryService, DocumentCategoryService>();
 
 var app = builder.Build();
 
