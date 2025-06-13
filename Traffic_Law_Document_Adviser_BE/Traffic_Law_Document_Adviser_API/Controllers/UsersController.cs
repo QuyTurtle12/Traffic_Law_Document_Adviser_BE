@@ -160,7 +160,9 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
         [Authorize(Roles = RoleConstants.Admin)]
         public async Task<IActionResult> Delete(Guid id)
         {
-            await _userService.DeleteUserAsync(id);
+            // Capture the admin’s user‐id from JWT:
+            var deletedBy = User.FindFirstValue(ClaimTypes.NameIdentifier)!;
+            await _userService.DeleteUserAsync(id, deletedBy);
             return NoContent();
         }
     }
