@@ -77,5 +77,18 @@ namespace BusinessLogic.Services
             _unitOfWork.GetRepository<Feedback>().Update(feedback);
             await _unitOfWork.SaveAsync();
         }
+
+        public async Task<IEnumerable<GetFeedbackDto>> GetAllFeedbacksAsync(int page, int pageSize)
+        {
+            IEnumerable<Feedback> feedbackList = await _unitOfWork.GetRepository<Feedback>()
+                .Entities
+                .Where(f => f.DeletedTime == null)
+                .OrderByDescending(f => f.CreatedTime)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return _mapper.Map<IEnumerable<GetFeedbackDto>>(feedbackList);
+        }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using BusinessLogic.IServices;
 using DataAccess.DTOs.FeedbackDTOs;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Traffic_Law_Document_Adviser_API.Controllers
@@ -46,5 +45,11 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
             await _feedbackService.DeleteFeedbackAsync(feedbackId);
             return NoContent();
         }
-    } 
+        [HttpGet("all")]
+        public async Task<IActionResult> GetAllFeedbacksAsync(int page = 1, int pageSize = 10)
+        {
+            var feedbacks = await _feedbackService.GetAllFeedbacksAsync(page, pageSize);
+            return Ok(feedbacks);
+        }
+    }
 }
