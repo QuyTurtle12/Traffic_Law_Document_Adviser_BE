@@ -44,6 +44,7 @@ namespace DataAccess.Services
         public async Task<GetNewsDTO?> GetNewsByIdAsync(Guid id)
         {
             var news = await _newsRepository.GetByIdAsync(id);
+            if (news == null || news.DeletedTime != null) return null;
             return news == null ? null : _mapper.Map<GetNewsDTO>(news);
         }
 

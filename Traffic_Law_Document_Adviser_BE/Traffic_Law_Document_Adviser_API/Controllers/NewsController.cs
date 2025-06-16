@@ -1,12 +1,15 @@
-﻿using DataAccess.DTOs.NewsDTOs;
+﻿using DataAccess.Constant;
+using DataAccess.DTOs.NewsDTOs;
 using DataAccess.IServices;
-using Microsoft.AspNetCore.Mvc;
 using DataAccess.ResponseModel;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Traffic_Law_Document_Adviser_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class NewsController : ControllerBase
     {
         private readonly INewsService _newsService;
@@ -20,6 +23,7 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
         /// Get paginated list of news
         /// </summary>
         [HttpGet]
+        [AllowAnonymous] // Allow anonymous access to news details
         public async Task<IActionResult> GetNews([FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 10)
         {
             var result = await _newsService.GetPaginatedNewsAsync(pageIndex, pageSize);
@@ -34,6 +38,7 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
         /// Get news by id
         /// </summary>
         [HttpGet("{id}")]
+        [AllowAnonymous] // Allow anonymous access to news details
         public async Task<IActionResult> GetNewsById(Guid id)
         {
             var news = await _newsService.GetNewsByIdAsync(id);
@@ -55,6 +60,7 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
         /// Create a new news
         /// </summary>
         [HttpPost]
+        [Authorize(Roles = RoleConstants.Staff)]
         public async Task<IActionResult> CreateNews([FromBody] AddNewsDTO addNewsDTO)
         {
             var result = await _newsService.CreateNewsAsync(addNewsDTO);
@@ -71,6 +77,7 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
         /// Update an existing news
         /// </summary>
         [HttpPut("{id}")]
+        [Authorize(Roles = RoleConstants.Staff)]
         public async Task<IActionResult> UpdateNews(Guid id, [FromBody] AddNewsDTO updateNewsDTO)
         {
             var result = await _newsService.UpdateNewsAsync(id, updateNewsDTO);
@@ -92,6 +99,7 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
         /// Delete a news
         /// </summary>
         [HttpDelete("{id}")]
+        [Authorize(Roles = RoleConstants.Staff)]
         public async Task<IActionResult> DeleteNews(Guid id)
         {
             var result = await _newsService.DeleteNewsAsync(id);
