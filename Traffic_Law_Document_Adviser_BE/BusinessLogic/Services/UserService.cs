@@ -6,6 +6,7 @@ using DataAccess.Entities;
 using DataAccess.ExceptionCustom;
 using DataAccess.IRepositories;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,19 +29,23 @@ namespace BusinessLogic.Services
         public async Task<IEnumerable<UserDTO>> GetAllUsersAsync()
         {
             var repo = _uow.GetRepository<User>();
-            var users = await repo.GetAllAsync();
+            var users = await repo.Entities
+                                  .Where(u => u.DeletedTime == null)
+                                  .ToListAsync();
             return users.Select(u => _mapper.Map<UserDTO>(u));
         }
 
         public async Task<UserDTO> GetUserByIdAsync(Guid id)
         {
-            var user = await _uow.GetRepository<User>().GetByIdAsync(id);
-            if (user == null)
+            var repo = _uow.GetRepository<User>();
+            var user = await repo.GetByIdAsync(id);
+            if (user == null || user.DeletedTime != null)
                 throw new ErrorException(
-                  StatusCodes.Status404NotFound,
-                  "USER_NOT_FOUND",
-                  $"No user found with ID={id}"
+                    StatusCodes.Status404NotFound,
+                    "USER_NOT_FOUND",
+                    $"No user found with ID={id}"
                 );
+
             return _mapper.Map<UserDTO>(user);
         }
 
@@ -103,18 +108,20 @@ namespace BusinessLogic.Services
             return _mapper.Map<UserDTO>(user);
         }
 
-        public async Task DeleteUserAsync(Guid id)
+        public async Task DeleteUserAsync(Guid id, string deletedBy)
         {
             var repo = _uow.GetRepository<User>();
             var user = await repo.GetByIdAsync(id);
-            if (user == null)
+            if (user == null || user.DeletedTime != null)
                 throw new ErrorException(
-                  StatusCodes.Status404NotFound,
-                  "USER_NOT_FOUND",
-                  $"No user found with ID={id}"
+                    StatusCodes.Status404NotFound,
+                    "USER_NOT_FOUND",
+                    $"No user found with ID={id}"
                 );
 
-            repo.Delete(user);
+            user.DeletedBy = deletedBy;
+            user.DeletedTime = DateTime.UtcNow;
+            repo.Update(user);
             await _uow.SaveAsync();
         }
     }
