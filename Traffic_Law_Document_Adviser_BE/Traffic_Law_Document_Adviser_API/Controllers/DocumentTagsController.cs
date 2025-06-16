@@ -3,6 +3,7 @@ using DataAccess.Constant;
 using DataAccess.DTOs.DocumentTagDTOs;
 using DataAccess.PaginatedList;
 using DataAccess.ResponseModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -29,6 +30,7 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
         /// <param name="nameSearch">DocumentTag name</param>
         /// <param name="parentNameSearch">DocumentTag parent name</param>
         /// <returns></returns>
+        [Authorize(Roles = RoleConstants.Staff)]
         [HttpGet]
         public async Task<IActionResult> GetPaginatedListAsync(int pageIndex = 1, int pageSize = 10, string? idSearch = null, string? nameSearch = null, string? parentNameSearch = null)
         {
@@ -47,6 +49,7 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
         /// </summary>
         /// <param name="id">DocumentTag id</param>
         /// <returns></returns>
+        [Authorize(Roles = RoleConstants.Staff)]
         [HttpGet]
         [Route("{id}")]
         public async Task<IActionResult> GetByIdAsync(Guid id)
@@ -66,6 +69,7 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
         /// </summary>
         /// <param name="documentTagDTO"></param>
         /// <returns></returns>
+        [Authorize(Roles = RoleConstants.Staff)]
         [HttpPost]
         public async Task<IActionResult> PostAsync(AddDocumentTagDTO documentTagDTO)
         {
@@ -84,6 +88,7 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
         /// <param name="id">DocumentTag id</param>
         /// <param name="documentTagDTO"></param>
         /// <returns></returns>
+        [Authorize(Roles = RoleConstants.Staff)]
         [HttpPut]
         [Route("{id}")]
         public async Task<IActionResult> PutAsync(Guid id, UpdateDocumentTagDTO documentTagDTO)
@@ -102,6 +107,7 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
         /// </summary>
         /// <param name="id">DocumentTag id</param>
         /// <returns></returns>
+        [Authorize(Roles = RoleConstants.Staff)]
         [HttpDelete]
         [Route("{id}")]
         public async Task<IActionResult> DeleteAsync(Guid id)
