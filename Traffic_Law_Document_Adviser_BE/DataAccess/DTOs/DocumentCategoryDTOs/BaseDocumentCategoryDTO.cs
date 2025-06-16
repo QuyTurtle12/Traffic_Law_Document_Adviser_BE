@@ -10,17 +10,7 @@ namespace DataAccess.DTOs.DocumentCategoryDTOs
 {
     public class BaseDocumentCategoryDTO
     {
-        [JsonIgnore]
-        public string? CreatedBy { get; set; }
-        [JsonIgnore]
-        public string? LastUpdatedBy { get; set; }
-        [JsonIgnore]
-        public string? DeletedBy { get; set; }
-        [JsonIgnore]
-        public DateTime? CreatedTime { get; set; }
-        [JsonIgnore]
-        public DateTime? LastUpdatedTime { get; set; }
-        [JsonIgnore]
-        public DateTime? DeletedTime { get; set; }
+        public string? Name { get; set; }
+
     }
 }

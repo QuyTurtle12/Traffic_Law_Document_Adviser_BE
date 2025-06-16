@@ -8,6 +8,6 @@ namespace DataAccess.DTOs.LawDocumentDTOs
 {
     public class GetLawDocumentDTO : BaseLawDocumentDTO
     {
-
+        public string? CategoryName { get; set; }
     }
 }
