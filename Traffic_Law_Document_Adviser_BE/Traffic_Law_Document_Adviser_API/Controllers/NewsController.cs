@@ -117,7 +117,7 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
         // Sync news from external API
         // </summary>
         [HttpPost("sync")]
-        [AllowAnonymous]
+        [Authorize(Roles = RoleConstants.Staff)]
         public async Task<IActionResult> SyncNews()
         {
             var result = await _newsService.SyncNewsFromApiAsync();
