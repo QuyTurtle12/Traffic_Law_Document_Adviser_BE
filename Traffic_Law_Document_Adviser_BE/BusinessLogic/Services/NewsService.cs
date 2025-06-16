@@ -93,57 +93,97 @@ namespace DataAccess.Services
 
         public async Task<List<GetNewsDTO>> SyncNewsFromApiAsync()
         {
-            var client = _httpClientFactory.CreateClient();
-            client.DefaultRequestHeaders.Add("x-api-key", ApiKey);
-
-            var response = await client.GetAsync("https://api.worldnewsapi.com/search-news?language=vi&text=luật%20giao%20thông");
-            response.EnsureSuccessStatusCode();
-
-            var content = await response.Content.ReadAsStringAsync();
-            var apiResponse = JsonSerializer.Deserialize<ApiResponse>(content);
-
-            if (apiResponse?.News == null) return new List<GetNewsDTO>();
-
-            var newsList = apiResponse.News.Select(article => new News
+            try
             {
-                Id = Guid.NewGuid(),
-                Title = article.Title,
-                Content = article.Text,
-                Author = article.Author,
-                ImageUrl = article.Image,
-                EmbeddedUrl = article.Url,
-                PublishedDate = DateTime.Parse(article.PublishDate),
-                CreatedTime = DateTime.UtcNow
-            }).ToList();
+                var client = _httpClientFactory.CreateClient();
+                client.DefaultRequestHeaders.Add("x-api-key", ApiKey);
 
-            foreach (var news in newsList)
-            {
-                await _newsRepository.InsertAsync(news);
+                // Call API to get news
+                var response = await client.GetAsync("https://api.worldnewsapi.com/search-news?language=vi&text=luật%20giao%20thông");
+                response.EnsureSuccessStatusCode();
+
+                var content = await response.Content.ReadAsStringAsync();
+                var apiResponse = JsonSerializer.Deserialize<ApiNewsResponse>(content);
+
+                if (apiResponse?.news == null || !apiResponse.news.Any())
+                    return new List<GetNewsDTO>();
+
+                var updatedNews = new List<News>();
+
+                foreach (var article in apiResponse.news)
+                {
+                    // Check if news already exists by embeddedNewsId
+                    var existingNews = await _newsRepository.Entities
+                        .FirstOrDefaultAsync(n => n.embeddedNewsId == article.id);
+
+                    if (existingNews != null)
+                    {
+                        // Update existing news
+                        existingNews.Title = article.title;
+                        existingNews.Content = article.summary;
+                        existingNews.Author = string.Join(",", article.authors ?? new List<string> { article.author }.Where(a => !string.IsNullOrEmpty(a)));
+                        existingNews.ImageUrl = article.image;
+                        existingNews.EmbeddedUrl = article.url;
+                        existingNews.PublishedDate = DateTime.Parse(article.publish_date);
+                        existingNews.LastUpdatedTime = DateTime.UtcNow;
+                        existingNews.LastUpdatedBy = "System";
+
+                        await _newsRepository.UpdateAsync(existingNews);
+                        updatedNews.Add(existingNews);
+                    }
+                    else
+                    {
+                        // Create new news
+                        var news = new News
+                        {
+                            Id = Guid.NewGuid(),
+                            embeddedNewsId = article.id,
+                            Title = article.title,
+                            Content = article.summary,
+                            Author = string.Join(",", article.authors ?? new List<string> { article.author }.Where(a => !string.IsNullOrEmpty(a))),
+                            ImageUrl = article.image,
+                            EmbeddedUrl = article.url,
+                            PublishedDate = DateTime.Parse(article.publish_date),
+                            CreatedTime = DateTime.UtcNow,
+                            CreatedBy = "System"
+                        };
+
+                        await _newsRepository.InsertAsync(news);
+                        updatedNews.Add(news);
+                    }
+                }
+
+                await _newsRepository.SaveAsync();
+                return _mapper.Map<List<GetNewsDTO>>(updatedNews);
             }
-            await _newsRepository.SaveAsync();
-
-            return _mapper.Map<List<GetNewsDTO>>(newsList);
+            catch (Exception ex)
+            {
+                // Log error details
+                throw;
+            }
         }
 
-        private class ApiResponse
+        private class ApiNewsResponse
         {
-            public int Offset { get; set; }
-            public int Number { get; set; }
-            public int Available { get; set; }
-            public List<ApiNewsArticle> News { get; set; } = new();
+            public int offset { get; set; }
+            public int number { get; set; }
+            public int available { get; set; }
+            public List<ApiNewsArticle> news { get; set; } = new();
         }
 
         private class ApiNewsArticle
         {
-            public string Title { get; set; } = string.Empty;
-            public string Text { get; set; } = string.Empty;
-            public string Summary { get; set; } = string.Empty;
-            public string Url { get; set; } = string.Empty;
-            public string Image { get; set; } = string.Empty;
-            public string PublishDate { get; set; } = string.Empty;
-            public string Author { get; set; } = string.Empty;
-            public List<string> Authors { get; set; } = new();
-            public string Language { get; set; } = string.Empty;
+            public int id { get; set; }
+            public string title { get; set; } = string.Empty;
+            public string text { get; set; } = string.Empty;
+            public string summary { get; set; } = string.Empty;
+            public string url { get; set; } = string.Empty;
+            public string image { get; set; } = string.Empty;
+            public string publish_date { get; set; } = string.Empty;
+            public string author { get; set; } = string.Empty;
+            public List<string> authors { get; set; } = new();
+            public string language { get; set; } = string.Empty;
+            public string source_country { get; set; } = string.Empty;
         }
     }
 }

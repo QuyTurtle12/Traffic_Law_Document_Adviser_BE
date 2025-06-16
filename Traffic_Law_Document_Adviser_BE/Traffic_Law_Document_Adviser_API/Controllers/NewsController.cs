@@ -113,18 +113,19 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
             return NoContent();
         }
 
-        /// <summary>
-        /// Sync news from external API
-        /// </summary>
-        //[HttpPost("sync")]
-        //public async Task<IActionResult> SyncNews()
-        //{
-        //    var result = await _newsService.SyncNewsFromApiAsync();
-        //    return Ok(new BaseResponseModel<object>(
-        //        StatusCodes.Status200OK,
-        //        "SUCCESS",
-        //        result,
-        //        "Sync news successfully"));
-        //}
+        // <summary>
+        // Sync news from external API
+        // </summary>
+        [HttpPost("sync")]
+        [AllowAnonymous]
+        public async Task<IActionResult> SyncNews()
+        {
+            var result = await _newsService.SyncNewsFromApiAsync();
+            return Ok(new BaseResponseModel<object>(
+                StatusCodes.Status200OK,
+                "SUCCESS",
+                result,
+                "Sync news successfully"));
+        }
     }
 }
