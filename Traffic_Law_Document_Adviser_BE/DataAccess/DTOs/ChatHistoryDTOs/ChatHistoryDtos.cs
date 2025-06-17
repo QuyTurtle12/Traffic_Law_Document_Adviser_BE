@@ -1,10 +1,15 @@
-﻿namespace DataAccess.DTOs.ChatHistoryDTOs
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace DataAccess.DTOs.ChatHistoryDTOs
 {
     public class PostChatHistoryDto
     {
+        [Required]
         public Guid UserId { get; set; }
-        public string? Question { get; set; }
-        public string? Answer { get; set; }
+        [Required]
+        public string Question { get; set; }
+        [Required]
+        public string Answer { get; set; }
     }
     public class GetChatHistoryDto
     {
