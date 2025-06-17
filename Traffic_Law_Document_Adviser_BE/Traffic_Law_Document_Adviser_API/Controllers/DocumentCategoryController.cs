@@ -4,6 +4,7 @@ using DataAccess.Constant;
 using DataAccess.DTOs.DocumentCategoryDTOs;
 using DataAccess.PaginatedList;
 using DataAccess.ResponseModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -34,6 +35,7 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = RoleConstants.Staff)]
         public async Task<IActionResult> PostDocumentCategoryAsync(AddDocumentCategoryDTO DocumentCategoryDTO)
         {
             if (DocumentCategoryDTO == null)
@@ -70,6 +72,7 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = RoleConstants.Staff)]
         public async Task<IActionResult> UpdateDocumentCategoryAsync(Guid id, [FromBody] UpdateDocumentCategoryDTO DocumentCategoryDTO)
         {
             if (DocumentCategoryDTO == null)
@@ -106,6 +109,7 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
         }
 
         [HttpDelete("soft-delete/{id}")]
+        [Authorize(Roles = RoleConstants.Staff)]
         public async Task<IActionResult> SoftDeleteDocumentCategoryAsync(Guid id)
         {
             try

@@ -34,6 +34,7 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = RoleConstants.Staff)]
         public async Task<IActionResult> PostLawDocumentAsync(AddLawDocumentDTO lawDocumentDTO)
         {
             if (lawDocumentDTO == null)
@@ -69,6 +70,7 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
             }
         }
 
+        [Authorize(Roles = RoleConstants.Staff)]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateLawDocumentAsync(Guid id, [FromBody] UpdateLawDocumentDTO lawDocumentDTO)
         {
@@ -105,6 +107,7 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
             }
         }
 
+        [Authorize(Roles = $"{RoleConstants.Staff},{RoleConstants.Admin}")]
         [HttpDelete("soft-delete/{id}")]
         public async Task<IActionResult> SoftDeleteLawDocumentAsync(Guid id)
         {
