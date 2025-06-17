@@ -1,15 +1,15 @@
-﻿using Azure;
-using BusinessLogic.IServices;
+﻿using BusinessLogic.IServices;
 using DataAccess.Constant;
 using DataAccess.DTOs.FeedbackDTOs;
-using DataAccess.Entities;
 using DataAccess.ResponseModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Traffic_Law_Document_Adviser_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class FeedbackController : ControllerBase
     {
         private readonly IFeedbackService _feedbackService;
