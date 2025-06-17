@@ -3,6 +3,7 @@ using DataAccess.Constant;
 using DataAccess.DTOs.LawDocumentDTOs;
 using DataAccess.PaginatedList;
 using DataAccess.ResponseModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Traffic_Law_Document_Adviser_API.Controllers
