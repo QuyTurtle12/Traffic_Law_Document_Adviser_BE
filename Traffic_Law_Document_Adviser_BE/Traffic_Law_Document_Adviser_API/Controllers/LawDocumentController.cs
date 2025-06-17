@@ -3,13 +3,11 @@ using DataAccess.Constant;
 using DataAccess.DTOs.LawDocumentDTOs;
 using DataAccess.PaginatedList;
 using DataAccess.ResponseModel;
-using Microsoft.AspNetCore.Cors.Infrastructure;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Traffic_Law_Document_Adviser_API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/law-documents")]
     [ApiController]
     public class LawDocumentController : Controller
     {
@@ -53,7 +51,7 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
                 await _lawDocumentService.CreateLawDocument(lawDocumentDTO);
 
                 return Ok(new BaseResponseModel<string>(
-                    statusCode: StatusCodes.Status200OK,
+                    statusCode: StatusCodes.Status201Created,
                     code: ResponseCodeConstants.SUCCESS,
                     data: null,
                     message: "Law Document created successfully."

@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using DataAccess.DTOs.DocumentTagMapDTOs;
 
 namespace DataAccess.DTOs.LawDocumentDTOs
 {
     public class UpdateLawDocumentDTO : BaseLawDocumentDTO
     {
-
+        public IEnumerable<AddDocumentTagMapDTO>? TagList { get; set; }
     }
 }

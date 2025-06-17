@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using BusinessLogic.IServices;
 using DataAccess.Constant;
+using DataAccess.DTOs.DocumentTagMapDTOs;
 using DataAccess.DTOs.LawDocumentDTOs;
 using DataAccess.Entities;
 using DataAccess.ExceptionCustom;
@@ -9,11 +10,6 @@ using DataAccess.PaginatedList;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BusinessLogic.Services
 {
@@ -37,7 +33,11 @@ namespace BusinessLogic.Services
                 throw new ErrorException(StatusCodes.Status400BadRequest, ResponseCodeConstants.BADREQUEST, "Page index or page size must be greater than or equal to 1.");
             }
 
-            IQueryable<LawDocument> query = _unitOfWork.GetRepository<LawDocument>().Entities.Include(dc => dc.Category);
+            IQueryable<LawDocument> query = _unitOfWork.GetRepository<LawDocument>().Entities
+                .Where(dc => !dc.DeletedTime.HasValue)
+                .Include(dc => dc.Category)
+                .Include(dc => dc.DocumentTagMaps)!
+                    .ThenInclude(dc => dc.Tag);
 
             // Apply id search filters if provided
             if (idSearch.HasValue)
@@ -85,9 +85,15 @@ namespace BusinessLogic.Services
             // Map the result to GetLawDocumentDTO
             IReadOnlyCollection<GetLawDocumentDTO> result = resultQuery.Items.Select(item =>
             {
-                GetLawDocumentDTO lawDocumentDTODTO = _mapper.Map<GetLawDocumentDTO>(item);
+                GetLawDocumentDTO lawDocumentDTO = _mapper.Map<GetLawDocumentDTO>(item);
 
-                return lawDocumentDTODTO;
+                lawDocumentDTO.TagList = item.DocumentTagMaps?.Select(tagMap => new GetDocumentTagMapDTO
+                {
+                    Id = tagMap.Id,
+                    TagName = tagMap.Tag?.Name ?? string.Empty
+                }).ToList() ?? new List<GetDocumentTagMapDTO>();
+
+                return lawDocumentDTO;
             }).ToList();
 
             PaginatedList<GetLawDocumentDTO> paginatedList = new PaginatedList<GetLawDocumentDTO>(result, resultQuery.TotalCount, resultQuery.PageNumber, resultQuery.PageSize);
@@ -117,24 +123,79 @@ namespace BusinessLogic.Services
             lawDocument.CreatedBy = "System";
             lawDocument.CreatedTime = DateTime.Now;
 
+            // Insert the LawDocument into the database
             await _unitOfWork.GetRepository<LawDocument>().InsertAsync(lawDocument);
+            await _unitOfWork.SaveAsync();
+
+            // Add DoumentTagMaps
+            if (lawDocumentDTO.TagList != null && lawDocumentDTO.TagList.Any())
+            {
+                List<DocumentTagMap> documentTagMaps = lawDocumentDTO.TagList.Select(tagMap => new DocumentTagMap
+                {
+                    DocumentTagId = tagMap.DocumentTagId,
+                    DocumentId = lawDocument.Id
+                }).ToList();
+
+                // Add each DocumentTagMap to the database
+                foreach (DocumentTagMap tagMap in documentTagMaps)
+                {
+                    await _unitOfWork.GetRepository<DocumentTagMap>().InsertAsync(tagMap);
+                }
+            }
+
             await _unitOfWork.SaveAsync();
         }
 
         public async Task UpdateLawDocument(Guid id, UpdateLawDocumentDTO lawDocumentDTO)
         {
+            // Get document by id
             IGenericRepository<LawDocument> repository = _unitOfWork.GetRepository<LawDocument>();
-            LawDocument? existingLawDocument = await repository.GetByIdAsync(id);
+            LawDocument? existingLawDocument = await repository.Entities
+                .Where(dc => dc.Id == id)
+                .Include(dc => dc.DocumentTagMaps)
+                .FirstOrDefaultAsync();
+
+            // Check if the law document exists
             if (existingLawDocument == null)
             {
                 throw new ErrorException(StatusCodes.Status404NotFound, ResponseCodeConstants.BADREQUEST, "Law Document not found!");
             }
 
+            // Map the DTO to the existing LawDocument entity
             LawDocument lawDocument = _mapper.Map(lawDocumentDTO, existingLawDocument);
             lawDocument.LastUpdatedBy = "System";
             lawDocument.LastUpdatedTime = DateTime.Now;
 
+            // Update the LawDocument in the database
             repository.Update(existingLawDocument);
+            await _unitOfWork.SaveAsync();
+
+            // Update DoumentTagMaps
+            if (lawDocumentDTO.TagList != null && lawDocumentDTO.TagList.Any())
+            {
+                // Clear existing DocumentTagMaps
+                if (existingLawDocument.DocumentTagMaps != null && existingLawDocument.DocumentTagMaps.Any())
+                {
+                    foreach (DocumentTagMap tagMap in existingLawDocument.DocumentTagMaps)
+                    {
+                        _unitOfWork.GetRepository<DocumentTagMap>().Delete(tagMap);
+                    }
+                }
+
+                // Add new DocumentTagMaps
+                List<DocumentTagMap> documentTagMaps = lawDocumentDTO.TagList.Select(tagMap => new DocumentTagMap
+                {
+                    DocumentTagId = tagMap.DocumentTagId,
+                    DocumentId = lawDocument.Id
+                }).ToList();
+
+                // Add each DocumentTagMap to the database
+                foreach (DocumentTagMap tagMap in documentTagMaps)
+                {
+                    await _unitOfWork.GetRepository<DocumentTagMap>().InsertAsync(tagMap);
+                }
+            }
+
             await _unitOfWork.SaveAsync();
         }
 
@@ -153,8 +214,14 @@ namespace BusinessLogic.Services
 
         public async Task SoftDeleteLawDocument(Guid id)
         {
+            // Get document by id
             IGenericRepository<LawDocument> repository = _unitOfWork.GetRepository<LawDocument>();
-            LawDocument? existingLawDocument = await repository.GetByIdAsync(id);
+            LawDocument? existingLawDocument = await repository.Entities
+                .Where(dc => dc.Id == id)
+                .Include(dc => dc.DocumentTagMaps)
+                .FirstOrDefaultAsync();
+
+            // Check if the law document exists
             if (existingLawDocument == null)
             {
                 throw new ErrorException(StatusCodes.Status404NotFound, ResponseCodeConstants.BADREQUEST, "Law document not found!");
@@ -164,6 +231,16 @@ namespace BusinessLogic.Services
             existingLawDocument.LastUpdatedBy = "System";
             existingLawDocument.LastUpdatedTime = DateTime.Now;
 
+            // Clear related DocumentTagMaps
+            if (existingLawDocument.DocumentTagMaps != null && existingLawDocument.DocumentTagMaps.Any())
+            {
+                foreach (DocumentTagMap tagMap in existingLawDocument.DocumentTagMaps)
+                {
+                    _unitOfWork.GetRepository<DocumentTagMap>().Delete(tagMap);
+                }
+            }
+
+            // Update the LawDocument in the database
             repository.Update(existingLawDocument);
             await _unitOfWork.SaveAsync();
         }
