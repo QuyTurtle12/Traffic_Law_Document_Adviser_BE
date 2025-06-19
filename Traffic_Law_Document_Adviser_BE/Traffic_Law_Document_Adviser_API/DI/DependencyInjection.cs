@@ -168,6 +168,8 @@ namespace Traffic_Law_Document_Adviser_API.DI
             services.AddScoped<ILawDocumentService, LawDocumentService>();
             services.AddScoped<IDocumentCategoryService, DocumentCategoryService>();
             services.AddScoped<IDocumentTagService, DocumentTagService>();
+
+            services.AddScoped<IPhotoService, PhotoService>();
         }
     }
 }
