@@ -89,7 +89,7 @@ namespace BusinessLogic.Services
 
                 lawDocumentDTO.TagList = item.DocumentTagMaps?.Select(tagMap => new GetDocumentTagMapDTO
                 {
-                    Id = tagMap.Id,
+                    Id = tagMap.DocumentTagId,
                     TagName = tagMap.Tag?.Name ?? string.Empty
                 }).ToList() ?? new List<GetDocumentTagMapDTO>();
 
