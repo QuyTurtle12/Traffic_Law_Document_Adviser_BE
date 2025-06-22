@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Traffic_Law_Document_Adviser_API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/document-categories")]
     [ApiController]
     public class DocumentCategoryController : Controller
     {
