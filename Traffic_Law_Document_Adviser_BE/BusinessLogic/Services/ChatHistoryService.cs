@@ -17,18 +17,19 @@ namespace BusinessLogic.Services
             _mapper = mapper;
             _unitOfWork = uow;
         }
-        public async Task<bool> CreateChatHistoryAsync(PostChatHistoryDto postChatHistoryDto)
+        public async Task<Guid> CreateChatHistoryAsync(PostChatHistoryDto postChatHistoryDto)
         {
             ChatHistory newChatHistory = _mapper.Map<ChatHistory>(postChatHistoryDto);
+            Guid id = newChatHistory.Id;
             try {
                 await _unitOfWork.GetRepository<ChatHistory>()
                     .InsertAsync(newChatHistory);
                 await _unitOfWork.SaveAsync();
             }catch (Exception)
             {
-                return false;
+                return Guid.Empty;
             }
-            return true;
+            return id;
         }
         public async Task<bool> DeleteChatHistoryAsync(Guid chatId)
         {

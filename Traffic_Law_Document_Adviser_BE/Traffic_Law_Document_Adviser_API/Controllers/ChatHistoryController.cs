@@ -2,14 +2,13 @@
 using DataAccess.Constant;
 using DataAccess.DTOs.ChatHistoryDTOs;
 using DataAccess.ResponseModel;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Traffic_Law_Document_Adviser_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class ChatHistoryController : ControllerBase
     {
         private readonly IChatHistoryService _chatHistoryService;
@@ -61,12 +60,12 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
             var result = await _chatHistoryService.CreateChatHistoryAsync(postChatHistoryDto);
             BaseResponseModel response;
 
-            if (result == false)
+            if (result == Guid.Empty)
             {
                 response = new BaseResponseModel(
                 statusCode: StatusCodes.Status400BadRequest,
                 code: ResponseCodeConstants.BADREQUEST,
-                data: null,
+                data: result,
                 message: "Create chat history fail."
                 );
                 return BadRequest(response);
@@ -75,7 +74,7 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
             response = new BaseResponseModel(
                 statusCode: StatusCodes.Status200OK,
                 code: ResponseCodeConstants.SUCCESS,
-                data: null,
+                data: result,
                 message: "Create chat history success."
                 );
             return Ok(response);
