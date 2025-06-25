@@ -20,15 +20,18 @@ namespace BusinessLogic.Services
         private readonly IUOW _unitOfWork;
         private readonly IMapper _mapper;
         private readonly JwtSettings _jwtSettings;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public AuthService(
           IUOW unitOfWork,
           IMapper mapper,
-          IOptions<JwtSettings> jwtConfig)
+          IOptions<JwtSettings> jwtConfig,
+          IHttpContextAccessor httpContextAccessor)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _jwtSettings = jwtConfig.Value;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<AuthResponseDTO> RegisterAsync(RegisterUserDTO dto)
@@ -137,6 +140,18 @@ namespace BusinessLogic.Services
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        public Task<User?> GetCurrentLoggedInUser()
+        {
+            // Get the current user's ID from the JWT claims
+            string? currentId = _httpContextAccessor.HttpContext?.User?.FindFirst("Sub")?.Value;
+
+            // If no ID is found, return null
+            if (string.IsNullOrWhiteSpace(currentId)) return Task.FromResult<User?>(null);
+
+            // Fetch the user from the database by ID
+            return _unitOfWork.GetRepository<User>().GetByIdAsync(Guid.Parse(currentId));
         }
     }
 }

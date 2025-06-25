@@ -1,11 +1,5 @@
 ﻿using DataAccess.DTOs.LawDocumentDTOs;
-using DataAccess.Entities;
 using DataAccess.PaginatedList;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BusinessLogic.IServices
 {
@@ -18,5 +12,6 @@ namespace BusinessLogic.IServices
         Task UpdateLawDocument(Guid id, UpdateLawDocumentDTO lawDocumentDTO);
         Task DeleteLawDocument(Guid id);
         Task SoftDeleteLawDocument(Guid id);
+        Task VerifyDocument(Guid id);
     }
 }

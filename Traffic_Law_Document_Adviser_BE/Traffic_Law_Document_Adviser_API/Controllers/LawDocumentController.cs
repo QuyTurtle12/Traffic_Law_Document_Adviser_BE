@@ -3,6 +3,7 @@ using DataAccess.Constant;
 using DataAccess.DTOs.LawDocumentDTOs;
 using DataAccess.PaginatedList;
 using DataAccess.ResponseModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Traffic_Law_Document_Adviser_API.Controllers
@@ -23,7 +24,7 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
         public async Task<IActionResult> GetPaginatedCartsAsync(int pageIndex = 1, int pageSize = 10, Guid? idSearch = null, string? titleSearch = null, string? documentCodeSearch = null,
             string? categoryNameSearch = null, string? filePathSearch = null, string? linkPathSearch = null, bool? expertVerificationSearch = null)
         {
-            PaginatedList<GetLawDocumentDTO> result = await _lawDocumentService.GetPaginatedLawDocumentsAsync(pageIndex, pageSize, idSearch, titleSearch, documentCodeSearch, 
+            PaginatedList<GetLawDocumentDTO> result = await _lawDocumentService.GetPaginatedLawDocumentsAsync(pageIndex, pageSize, idSearch, titleSearch, documentCodeSearch,
                 categoryNameSearch, filePathSearch, linkPathSearch, expertVerificationSearch);
             return Ok(new BaseResponseModel<PaginatedList<GetLawDocumentDTO>>(
                     statusCode: StatusCodes.Status200OK,
@@ -131,7 +132,22 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
             }
         }
 
-
-
+        /// <summary>
+        /// Verify a law document
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [Authorize(Roles = RoleConstants.Expert)]
+        [HttpPost("verification/{id}")]
+        public async Task<IActionResult> VerifyDocumentAsync(Guid id)
+        {
+            await _lawDocumentService.VerifyDocument(id);
+            return Ok(new BaseResponseModel<string>(
+                statusCode: StatusCodes.Status200OK,
+                code: ResponseCodeConstants.SUCCESS,
+                data: null,
+                message: "Law Document verified successfully."
+            ));
+        }
     }
 }
