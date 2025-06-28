@@ -19,11 +19,13 @@ namespace BusinessLogic.Services
         }
         public async Task<Guid> CreateChatHistoryAsync(PostChatHistoryDto postChatHistoryDto)
         {
+            postChatHistoryDto.Answer = "Bot answer is not available yet.";
             ChatHistory newChatHistory = _mapper.Map<ChatHistory>(postChatHistoryDto);
+            newChatHistory.CreatedTime = DateTime.Now;
             Guid id = newChatHistory.Id;
+
             try {
-                await _unitOfWork.GetRepository<ChatHistory>()
-                    .InsertAsync(newChatHistory);
+                await _unitOfWork.GetRepository<ChatHistory>().InsertAsync(newChatHistory);
                 await _unitOfWork.SaveAsync();
             }catch (Exception)
             {
