@@ -16,6 +16,6 @@ namespace DataAccess.DTOs.ChatHistoryDTOs
         public Guid UserId { get; set; }
         public string? Question { get; set; }
         public string? Answer { get; set; }
-        public DateTime CreatedAt { get; set; }
+        public DateTime CreatedTime { get; set; }
     }
 }
