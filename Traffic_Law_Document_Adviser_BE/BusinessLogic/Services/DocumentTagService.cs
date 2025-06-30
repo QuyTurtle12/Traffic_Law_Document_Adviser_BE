@@ -114,6 +114,33 @@ namespace BusinessLogic.Services
 
         public async Task AddAsync(AddDocumentTagDTO documentTagDto)
         {
+            // If ParentTagId is provided, validate it
+            if (documentTagDto.ParentTagId.HasValue)
+            {
+                // Check if parent tag exists and is not deleted
+                var parentTag = await _unitOfWork.GetRepository<DocumentTag>().Entities
+                    .Where(dt => dt.Id == documentTagDto.ParentTagId && !dt.DeletedTime.HasValue)
+                    .Include(dt => dt.ParentTag)
+                    .FirstOrDefaultAsync();
+
+                if (parentTag == null)
+                {
+                    throw new ErrorException(
+                        StatusCodes.Status404NotFound,
+                        ResponseCodeConstants.NOT_FOUND,
+                        $"Parent tag with ID {documentTagDto.ParentTagId} not found or is deleted.");
+                }
+
+                // Prevent circular references by checking the parent chain
+                if (await WouldCreateCycle(documentTagDto.ParentTagId.Value, null))
+                {
+                    throw new ErrorException(
+                        StatusCodes.Status400BadRequest,
+                        ResponseCodeConstants.BADREQUEST,
+                        "Cannot create a cyclic relationship in the tag hierarchy.");
+                }
+            }
+
             // Map the DTO to DocumentTag entity
             DocumentTag documentTag = _mapper.Map<DocumentTag>(documentTagDto);
 
@@ -126,15 +153,80 @@ namespace BusinessLogic.Services
             await _unitOfWork.SaveAsync();
         }
 
+        private async Task<bool> WouldCreateCycle(Guid parentId, Guid? childId)
+        {
+            // If we find the child ID in the parent chain, it's a cycle
+            if (childId.HasValue && parentId == childId.Value)
+            {
+                return true;
+            }
+
+            // Get the parent's parent
+            var parent = await _unitOfWork.GetRepository<DocumentTag>().Entities
+                .Where(dt => dt.Id == parentId && !dt.DeletedTime.HasValue)
+                .Select(dt => new { dt.Id, dt.ParentTagId })
+                .FirstOrDefaultAsync();
+
+            if (parent == null || !parent.ParentTagId.HasValue)
+            {
+                return false;
+            }
+
+            // Recursively check the parent chain
+            return await WouldCreateCycle(parent.ParentTagId.Value, childId ?? parentId);
+        }
+
         public async Task UpdateAsync(Guid id, UpdateDocumentTagDTO documentTagDto)
         {
-            // Get the existing document tag by id
-            DocumentTag? existingDocumentTag = await _unitOfWork.GetRepository<DocumentTag>().GetByIdAsync(id);
+            // Get the existing document tag by id with its relationships
+            DocumentTag? existingDocumentTag = await _unitOfWork.GetRepository<DocumentTag>().Entities
+                .Where(dt => dt.Id == id && !dt.DeletedTime.HasValue)
+                .Include(dt => dt.ParentTag)
+                .Include(dt => dt.ChildTags)
+                .FirstOrDefaultAsync();
 
             // If the document tag is not found, throw an exception
-            if (existingDocumentTag == null || existingDocumentTag.DeletedTime.HasValue)
+            if (existingDocumentTag == null)
             {
-                throw new ErrorException(StatusCodes.Status404NotFound, ResponseCodeConstants.NOT_FOUND, $"Document tag with id {id} was not found");
+                throw new ErrorException(
+                    StatusCodes.Status404NotFound,
+                    ResponseCodeConstants.NOT_FOUND,
+                    $"Document tag with id {id} was not found");
+            }
+
+            // If ParentTagId is provided and different from current
+            if (documentTagDto.ParentTagId.HasValue && documentTagDto.ParentTagId != existingDocumentTag.ParentTagId)
+            {
+                // Prevent self-reference
+                if (documentTagDto.ParentTagId == id)
+                {
+                    throw new ErrorException(
+                        StatusCodes.Status400BadRequest,
+                        ResponseCodeConstants.BADREQUEST,
+                        "A tag cannot be its own parent.");
+                }
+
+                // Check if new parent tag exists and is not deleted
+                var parentTag = await _unitOfWork.GetRepository<DocumentTag>().Entities
+                    .Where(dt => dt.Id == documentTagDto.ParentTagId && !dt.DeletedTime.HasValue)
+                    .FirstOrDefaultAsync();
+
+                if (parentTag == null)
+                {
+                    throw new ErrorException(
+                        StatusCodes.Status404NotFound,
+                        ResponseCodeConstants.NOT_FOUND,
+                        $"Parent tag with ID {documentTagDto.ParentTagId} not found or is deleted.");
+                }
+
+                // Check for cyclic relationships
+                if (await WouldCreateCycle(documentTagDto.ParentTagId.Value, id))
+                {
+                    throw new ErrorException(
+                        StatusCodes.Status400BadRequest,
+                        ResponseCodeConstants.BADREQUEST,
+                        "Cannot create a cyclic relationship in the tag hierarchy.");
+                }
             }
 
             // Map the updated values from the DTO to the existing entity
@@ -162,6 +254,28 @@ namespace BusinessLogic.Services
             // Soft delete
             documentTag.DeletedTime = DateTime.UtcNow;
             documentTag.LastUpdatedTime = documentTag.DeletedTime;
+
+            // Get all DocumentTagMap entities associated with the document tag
+            ICollection<DocumentTagMap> documentTagMaps = await _unitOfWork.GetRepository<DocumentTagMap>().Entities
+                .Where(dtMap => dtMap.DocumentTagId == id)
+                .ToListAsync();
+
+            // Delete the document tag maps
+            foreach (DocumentTagMap documentTagMap in documentTagMaps)
+            {
+                await _unitOfWork.GetRepository<DocumentTagMap>().DeleteAsync(documentTagMap);
+            }
+
+            // Get the child tags of the document tag
+            ICollection<DocumentTag> childTags = await _unitOfWork.GetRepository<DocumentTag>().Entities
+                .Where(dt => dt.ParentTagId == id && !dt.DeletedTime.HasValue)
+                .ToListAsync();
+
+            // Delete the parent tag id from child tags
+            foreach (DocumentTag tag in childTags)
+            {
+                tag.ParentTagId = null;
+            }
 
             await _unitOfWork.SaveAsync();
         }

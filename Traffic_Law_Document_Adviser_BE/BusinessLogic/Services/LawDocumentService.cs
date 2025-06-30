@@ -28,7 +28,7 @@ namespace BusinessLogic.Services
         }
 
         public async Task<PaginatedList<GetLawDocumentDTO>> GetPaginatedLawDocumentsAsync(int pageIndex, int pageSize, Guid? idSearch, string? titleSearch, string? documentCodeSearch,
-            string? categoryNameSearch, string? filePathSearch, string? linkPathSearch, bool? expertVerificationSearch)
+            string? categoryNameSearch, string? filePathSearch, string? linkPathSearch, bool? expertVerificationSearch, string[]? tagIdSearch)
         {
             if (pageIndex < 1 && pageSize < 1)
             {
@@ -76,6 +76,19 @@ namespace BusinessLogic.Services
             if (expertVerificationSearch.HasValue)
             {
                 query = query.Where(p => p.ExpertVerification == expertVerificationSearch);
+            }
+
+            // Apply tag search filter if provided
+            if (tagIdSearch != null && tagIdSearch.Length > 0)
+            {
+                // Convert string array to Guid array
+                var tagGuids = tagIdSearch.Select(t => Guid.Parse(t)).ToArray();
+
+                // Filter documents that have ALL the specified tags
+                query = query.Where(doc =>
+                    tagGuids.All(tagId =>
+                        doc.DocumentTagMaps!.Any(map =>
+                            map.DocumentTagId == tagId)));
             }
 
             query = query.OrderByDescending(p => p.CreatedTime);

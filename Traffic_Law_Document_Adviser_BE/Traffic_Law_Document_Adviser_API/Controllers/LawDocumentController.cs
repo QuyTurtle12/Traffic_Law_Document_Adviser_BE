@@ -22,10 +22,10 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
 
         [HttpGet]
         public async Task<IActionResult> GetPaginatedCartsAsync(int pageIndex = 1, int pageSize = 10, Guid? idSearch = null, string? titleSearch = null, string? documentCodeSearch = null,
-            string? categoryNameSearch = null, string? filePathSearch = null, string? linkPathSearch = null, bool? expertVerificationSearch = null)
+            string? categoryNameSearch = null, string? filePathSearch = null, string? linkPathSearch = null, bool? expertVerificationSearch = null, [FromQuery(Name = "tagIds")] string[]? tagIdSearch = null)
         {
             PaginatedList<GetLawDocumentDTO> result = await _lawDocumentService.GetPaginatedLawDocumentsAsync(pageIndex, pageSize, idSearch, titleSearch, documentCodeSearch,
-                categoryNameSearch, filePathSearch, linkPathSearch, expertVerificationSearch);
+                categoryNameSearch, filePathSearch, linkPathSearch, expertVerificationSearch, tagIdSearch);
             return Ok(new BaseResponseModel<PaginatedList<GetLawDocumentDTO>>(
                     statusCode: StatusCodes.Status200OK,
                     code: ResponseCodeConstants.SUCCESS,

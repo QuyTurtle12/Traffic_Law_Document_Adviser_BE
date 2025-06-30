@@ -6,7 +6,7 @@ namespace BusinessLogic.IServices
     public interface ILawDocumentService
     {
         Task<PaginatedList<GetLawDocumentDTO>> GetPaginatedLawDocumentsAsync(int pageIndex, int pageSize, Guid? idSearch, string? titleSearch, string? documentCodeSearch, 
-            string? categoryNameSearch, string? filePathSearch, string? linkPathSearch, bool? expertVerificationSearch);
+            string? categoryNameSearch, string? filePathSearch, string? linkPathSearch, bool? expertVerificationSearch, string[]? tagIdSearch);
         Task<GetLawDocumentDTO> GetLawDocumentById(Guid id);
         Task CreateLawDocument(AddLawDocumentDTO lawDocumentDTO);
         Task UpdateLawDocument(Guid id, UpdateLawDocumentDTO lawDocumentDTO);
