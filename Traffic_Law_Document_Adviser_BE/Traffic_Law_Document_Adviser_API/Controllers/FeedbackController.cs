@@ -9,7 +9,7 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class FeedbackController : ControllerBase
     {
         private readonly IFeedbackService _feedbackService;

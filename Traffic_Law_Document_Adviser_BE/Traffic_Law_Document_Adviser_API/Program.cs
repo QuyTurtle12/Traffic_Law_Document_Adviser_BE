@@ -1,10 +1,13 @@
-﻿using DataAccess.DTOs.NewsDTOs;
+﻿using BusinessLogic.Helpers;
+using DataAccess.DTOs.NewsDTOs;
 using DataAccess.Entities;
 using Product_Sale_API.Middleware;
 using Traffic_Law_Document_Adviser_API.DI;
 
 var builder = WebApplication.CreateBuilder(args);
-
+// Add config for Cloudinary settings
+builder.Services.Configure<CloudinarySettings>(
+    builder.Configuration.GetSection("CloudinarySettings"));
 // Add services to the container.
 
 builder.Services.AddControllers();

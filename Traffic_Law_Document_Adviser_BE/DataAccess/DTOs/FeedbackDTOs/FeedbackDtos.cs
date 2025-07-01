@@ -9,6 +9,7 @@ namespace DataAccess.DTOs.FeedbackDTOs
         public Guid ChatHistory { get; set; }
         public string? AIAnswer { get; set; }
         public string? Content { get; set; }
+        public DateTime CreatedTime { get; set; }
     }
     public class PostFeedbackDto
     {
@@ -18,8 +19,7 @@ namespace DataAccess.DTOs.FeedbackDTOs
         public Guid ChatHistory { get; set; }
         public string? AIAnswer { get; set; }
         public string? Content { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime LastUpdatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedTime { get; set; } = DateTime.Now;
     }
     public class PutFeedbackDto
     {

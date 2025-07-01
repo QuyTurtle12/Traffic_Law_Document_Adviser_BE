@@ -15,7 +15,7 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
     public class DocumentCategoryController : Controller
     {
         private readonly IDocumentCategoryService _documentCategoryService;
-
+        
         // Constructor
         public DocumentCategoryController(IDocumentCategoryService documentCategoryService)
         {

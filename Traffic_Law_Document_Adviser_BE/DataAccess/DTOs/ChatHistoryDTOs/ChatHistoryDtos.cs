@@ -8,8 +8,7 @@ namespace DataAccess.DTOs.ChatHistoryDTOs
         public Guid UserId { get; set; }
         [Required]
         public string Question { get; set; }
-        [Required]
-        public string Answer { get; set; }
+        public string? Answer { get; set; }
     }
     public class GetChatHistoryDto
     {
@@ -17,6 +16,6 @@ namespace DataAccess.DTOs.ChatHistoryDTOs
         public Guid UserId { get; set; }
         public string? Question { get; set; }
         public string? Answer { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedTime { get; set; }
     }
 }
