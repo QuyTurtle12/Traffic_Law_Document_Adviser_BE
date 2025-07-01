@@ -36,7 +36,7 @@ namespace BusinessLogic.Services
                 throw new ErrorException(StatusCodes.Status400BadRequest, ResponseCodeConstants.BADREQUEST, "Page index or page size must be greater than or equal to 1.");
             }
 
-            IQueryable<DocumentCategory> query = _unitOfWork.GetRepository<DocumentCategory>().Entities;
+            IQueryable<DocumentCategory> query = _unitOfWork.GetRepository<DocumentCategory>().Entities.Where(dc => !dc.DeletedTime.HasValue);
 
             // Apply id search filters if provided
             if (idSearch.HasValue)

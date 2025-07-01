@@ -1,9 +1,5 @@
 ﻿using DataAccess.DTOs.AuthDTOs;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using DataAccess.Entities;
 
 namespace BusinessLogic.IServices
 {
@@ -11,5 +7,6 @@ namespace BusinessLogic.IServices
     {
         Task<AuthResponseDTO> RegisterAsync(RegisterUserDTO dto);
         Task<AuthResponseDTO> LoginAsync(LoginDTO dto);
+        Task<User?> GetCurrentLoggedInUser();
     }
 }

@@ -17,16 +17,18 @@ namespace BusinessLogic.Services
     {
         private readonly IMapper _mapper;
         private readonly IUOW _unitOfWork;
+        private readonly IAuthService _authService;
 
         // Constructor
-        public LawDocumentService(IMapper mapper, IUOW uow)
+        public LawDocumentService(IMapper mapper, IUOW uow, IAuthService authService)
         {
             _mapper = mapper;
             _unitOfWork = uow;
+            _authService = authService;
         }
 
         public async Task<PaginatedList<GetLawDocumentDTO>> GetPaginatedLawDocumentsAsync(int pageIndex, int pageSize, Guid? idSearch, string? titleSearch, string? documentCodeSearch,
-            string? categoryNameSearch, string? filePathSearch, string? linkPathSearch, bool? expertVerificationSearch)
+            string? categoryNameSearch, string? filePathSearch, string? linkPathSearch, bool? expertVerificationSearch, string[]? tagIdSearch)
         {
             if (pageIndex < 1 && pageSize < 1)
             {
@@ -76,6 +78,19 @@ namespace BusinessLogic.Services
                 query = query.Where(p => p.ExpertVerification == expertVerificationSearch);
             }
 
+            // Apply tag search filter if provided
+            if (tagIdSearch != null && tagIdSearch.Length > 0)
+            {
+                // Convert string array to Guid array
+                var tagGuids = tagIdSearch.Select(t => Guid.Parse(t)).ToArray();
+
+                // Filter documents that have ALL the specified tags
+                query = query.Where(doc =>
+                    tagGuids.All(tagId =>
+                        doc.DocumentTagMaps!.Any(map =>
+                            map.DocumentTagId == tagId)));
+            }
+
             query = query.OrderByDescending(p => p.CreatedTime);
 
             // Change to paginated list to facilitate mapping process
@@ -89,7 +104,7 @@ namespace BusinessLogic.Services
 
                 lawDocumentDTO.TagList = item.DocumentTagMaps?.Select(tagMap => new GetDocumentTagMapDTO
                 {
-                    Id = tagMap.Id,
+                    Id = tagMap.DocumentTagId,
                     TagName = tagMap.Tag?.Name ?? string.Empty
                 }).ToList() ?? new List<GetDocumentTagMapDTO>();
 
@@ -245,6 +260,31 @@ namespace BusinessLogic.Services
             await _unitOfWork.SaveAsync();
         }
 
-        
+        public async Task VerifyDocument(Guid id)
+        {
+            // Get document by id
+            LawDocument? lawDocument = await _unitOfWork.GetRepository<LawDocument>().Entities
+                .Where(dc => dc.Id == id && !dc.DeletedTime.HasValue)
+                .FirstOrDefaultAsync();
+
+            // Check if the law document exists
+            if (lawDocument == null)
+            {
+                throw new ErrorException(StatusCodes.Status404NotFound, ResponseCodeConstants.NOT_FOUND, "Law document not found!");
+            }
+
+            // Verify the document
+            lawDocument.ExpertVerification = true;
+
+            User? currentUser = await _authService.GetCurrentLoggedInUser();
+
+            // Set the last updated information
+            lawDocument.LastUpdatedBy = currentUser?.Email ?? "System";
+            lawDocument.LastUpdatedTime = DateTime.Now;
+
+            // Update the LawDocument in the database
+            await _unitOfWork.GetRepository<LawDocument>().UpdateAsync(lawDocument);
+            await _unitOfWork.SaveAsync();
+        }
     }
 }

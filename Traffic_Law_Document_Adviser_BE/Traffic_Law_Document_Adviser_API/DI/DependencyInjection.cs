@@ -31,6 +31,7 @@ namespace Traffic_Law_Document_Adviser_API.DI
             services.AddRepository();
             services.AddAutoMapper();
             services.AddServices();
+            //services.AddOtherServices();
 
         }
         /// <summary>
@@ -169,5 +170,10 @@ namespace Traffic_Law_Document_Adviser_API.DI
             services.AddScoped<IDocumentCategoryService, DocumentCategoryService>();
             services.AddScoped<IDocumentTagService, DocumentTagService>();
         }
+
+        //private static void AddOtherServices(this IServiceCollection services)
+        //{
+        //    services.AddHttpContextAccessor();
+        //}
     }
 }
