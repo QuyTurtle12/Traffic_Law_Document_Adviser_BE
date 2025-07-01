@@ -12,7 +12,7 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize] // any authenticated user (User/Expert/Admin)
+   // [Authorize] // any authenticated user (User/Expert/Admin)
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
@@ -27,7 +27,7 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
         /// Only Admin can list all users.
         /// </summary>
         [HttpGet]
-        [Authorize(Roles = RoleConstants.Admin)]
+        // [Authorize(Roles = RoleConstants.Admin)]
         public async Task<IActionResult> GetAll()
         {
             var users = await _userService.GetAllUsersAsync();
