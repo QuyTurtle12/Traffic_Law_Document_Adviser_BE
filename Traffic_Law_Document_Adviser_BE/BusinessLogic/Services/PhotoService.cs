@@ -39,18 +39,38 @@ namespace BusinessLogic.Services
             if (file.Length > 0)
             {
                 await using var stream = file.OpenReadStream();
+                var extension = Path.GetExtension(file.FileName).ToLower();
 
-                var uploadParams = new ImageUploadParams
+                if (extension == ".pdf" || extension == ".docx" || extension == ".txt")
                 {
-                    File = new FileDescription(file.FileName, stream),
-                    Folder = "uploads",
-                    PublicId = fileName,
-                    UseFilename = false,
-                    UniqueFilename = false
-                };
-                var result = await _cloudinary.UploadAsync(uploadParams);
-                return result.SecureUrl.ToString();
+                    var rawParams = new RawUploadParams
+                    {
+                        File = new FileDescription(file.FileName, stream),
+                        Folder = "uploads",
+                        PublicId = fileName.Replace(" ", "").ToLower(),
+                        UseFilename = false,
+                        UniqueFilename = false,
+                    };
+
+                    var result = await _cloudinary.UploadAsync(rawParams);
+                    return result.SecureUrl.ToString();
+                }
+                else
+                {
+                    var uploadParams = new ImageUploadParams
+                    {
+                        File = new FileDescription(file.FileName, stream),
+                        Folder = "uploads",
+                        PublicId = fileName.Replace(" ", "").ToLower(),
+                        UseFilename = false,
+                        UniqueFilename = false
+                    };
+
+                    var result = await _cloudinary.UploadAsync(uploadParams);
+                    return result.SecureUrl.ToString();
+                }
             }
+
             return null;
         }
         public async Task<bool> DeleteImageAsync(string url)
