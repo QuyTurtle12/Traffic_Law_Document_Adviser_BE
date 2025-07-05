@@ -8,7 +8,7 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class PhotoController : ControllerBase
     {
         private readonly IPhotoService _photoService;
@@ -118,5 +118,25 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
 
             return File(stream, contentType);
         }
+
+        [HttpGet("download")]
+        public async Task<IActionResult> Download([FromQuery] string url)
+        {
+            var (stream, contentType) = await _photoService.DownloadFileAsync(url);
+            if (stream == null)
+            {
+                var notFoundResp = new BaseResponseModel(
+                    statusCode: StatusCodes.Status404NotFound,
+                    code: ResponseCodeConstants.NOT_FOUND,
+                    message: "File not found."
+                );
+                return NotFound(notFoundResp);
+            }
+
+            var filename = Path.GetFileName(new Uri(url).LocalPath);
+
+            return File(stream, contentType, filename);
+        }
+
     }
 }
