@@ -9,6 +9,5 @@ namespace DataAccess.DTOs.LawDocumentDTOs
         public Guid? CategoryId { get; set; }
         public string? FilePath { get; set; }
         public string? LinkPath { get; set; }
-        public bool ExpertVerification { get; set; } = false;
     }
 }
