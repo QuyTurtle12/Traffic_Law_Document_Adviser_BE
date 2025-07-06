@@ -26,20 +26,48 @@ namespace DataAccess.Services
             _httpClientFactory = httpClientFactory;
         }
 
-        public async Task<PaginatedList<GetNewsDTO>> GetPaginatedNewsAsync(int pageIndex = 1, int pageSize = 10)
-        {
-            var query = _newsRepository.Entities
-                .Where(n => n.DeletedTime == null)
-                .OrderByDescending(n => n.PublishedDate);
+        public async Task<PaginatedList<GetNewsDTO>> GetPaginatedNewsAsync(
+        int pageIndex = 1,
+        int pageSize = 10,
+        string? titleFilter = null,
+        string? authorFilter = null,
+        string? contentFilter = null,
+        DateTime? startDate = null,
+        DateTime? endDate = null)
+            {
+                var query = _newsRepository.Entities
+                    .Where(n => n.DeletedTime == null);
 
-            var count = await query.CountAsync();
-            var items = await query.Skip((pageIndex - 1) * pageSize)
-                                 .Take(pageSize)
-                                 .ToListAsync();
+                // Apply filters
+                if (!string.IsNullOrWhiteSpace(titleFilter))
+                    query = query.Where(n => n.Title != null &&
+                        n.Title.Contains(titleFilter));
 
-            var dtoItems = _mapper.Map<List<GetNewsDTO>>(items);
-            return new PaginatedList<GetNewsDTO>(dtoItems, count, pageIndex, pageSize);
-        }
+                if (!string.IsNullOrWhiteSpace(authorFilter))
+                    query = query.Where(n => n.Author != null &&
+                        n.Author.Contains(authorFilter));
+
+                if (!string.IsNullOrWhiteSpace(contentFilter))
+                    query = query.Where(n => n.Content != null &&
+                        n.Content.Contains(contentFilter));
+
+                if (startDate.HasValue)
+                    query = query.Where(n => n.PublishedDate >= startDate.Value.Date);
+
+                if (endDate.HasValue)
+                    query = query.Where(n => n.PublishedDate <= endDate.Value.Date.AddDays(1).AddTicks(-1));
+
+                // Apply ordering
+                query = query.OrderByDescending(n => n.PublishedDate);
+
+                var count = await query.CountAsync();
+                var items = await query.Skip((pageIndex - 1) * pageSize)
+                                      .Take(pageSize)
+                                      .ToListAsync();
+
+                var dtoItems = _mapper.Map<List<GetNewsDTO>>(items);
+                return new PaginatedList<GetNewsDTO>(dtoItems, count, pageIndex, pageSize);
+            }
 
         public async Task<GetNewsDTO?> GetNewsByIdAsync(Guid id)
         {

@@ -23,16 +23,31 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
         /// Get paginated list of news
         /// </summary>
         [HttpGet]
-        [AllowAnonymous] // Allow anonymous access to news details
-        public async Task<IActionResult> GetNews([FromQuery] int pageIndex = 1, [FromQuery] int pageSize = 10)
-        {
-            var result = await _newsService.GetPaginatedNewsAsync(pageIndex, pageSize);
-            return Ok(new BaseResponseModel<object>(
-                StatusCodes.Status200OK,
-                "SUCCESS",
-                result,
-                "Get news successfully"));
-        }
+        [AllowAnonymous]
+        public async Task<IActionResult> GetNews(
+        [FromQuery] int pageIndex = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? titleFilter = null,
+        [FromQuery] string? authorFilter = null,
+        [FromQuery] string? contentFilter = null,
+        [FromQuery] DateTime? startDate = null,
+        [FromQuery] DateTime? endDate = null)
+            {
+                var result = await _newsService.GetPaginatedNewsAsync(
+                    pageIndex,
+                    pageSize,
+                    titleFilter,
+                    authorFilter,
+                    contentFilter,
+                    startDate,
+                    endDate);
+
+                return Ok(new BaseResponseModel<object>(
+                    StatusCodes.Status200OK,
+                    "SUCCESS",
+                    result,
+                    "Get news successfully"));
+            }
 
         /// <summary>
         /// Get news by id
