@@ -100,21 +100,14 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
             );
             return BadRequest(response);
         }
+
+
         [HttpGet("show")]
-        public async Task<IActionResult> ShowImage([FromQuery] string url)
+        public async Task<IActionResult> Show([FromQuery] string url)
         {
             var (stream, contentType) = await _photoService.GetImageAsync(url);
-            BaseResponseModel response;
-
             if (stream == null)
-            {
-                response = new BaseResponseModel(
-                    statusCode: StatusCodes.Status404NotFound,
-                    code: ResponseCodeConstants.NOT_FOUND,
-                    message: "Image not found."
-                );
-                return NotFound(response);
-            }
+                return NotFound(/* … your 404 response … */);
 
             return File(stream, contentType);
         }
@@ -122,19 +115,11 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
         [HttpGet("download")]
         public async Task<IActionResult> Download([FromQuery] string url)
         {
-            var (stream, contentType) = await _photoService.DownloadFileAsync(url);
+            var (stream, contentType) = await _photoService.GetImageAsync(url);
             if (stream == null)
-            {
-                var notFoundResp = new BaseResponseModel(
-                    statusCode: StatusCodes.Status404NotFound,
-                    code: ResponseCodeConstants.NOT_FOUND,
-                    message: "File not found."
-                );
-                return NotFound(notFoundResp);
-            }
+                return NotFound(/* … your 404 response … */);
 
             var filename = Path.GetFileName(new Uri(url).LocalPath);
-
             return File(stream, contentType, filename);
         }
 
