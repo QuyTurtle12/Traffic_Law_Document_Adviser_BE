@@ -1,5 +1,6 @@
 ﻿using DataAccess.DTOs.LawDocumentDTOs;
 using DataAccess.PaginatedList;
+using Microsoft.AspNetCore.Http;
 
 namespace BusinessLogic.IServices
 {
@@ -13,5 +14,7 @@ namespace BusinessLogic.IServices
         Task DeleteLawDocument(Guid id);
         Task SoftDeleteLawDocument(Guid id);
         Task VerifyDocument(Guid id);
+        Task CreateLawDocumentWithUploadAsync(AddLawDocumentDTO dto, IFormFile file);
+
     }
 }
