@@ -2,7 +2,7 @@
 
 namespace BusinessLogic.IServices
 {
-    public interface IPhotoService
+    public interface IPdfService
     {
         Task<string> UploadImageAsync(IFormFile file, string fileName);
         Task<(Stream Stream, string ContentType)> GetImageAsync(string url);
