@@ -9,11 +9,11 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     //[Authorize]
-    public class PhotoController : ControllerBase
+    public class PdfController : ControllerBase
     {
-        private readonly IPhotoService _photoService;
+        private readonly IPdfService _photoService;
 
-        public PhotoController(IPhotoService photoService)
+        public PdfController(IPdfService photoService)
         {
             _photoService = photoService;
         }

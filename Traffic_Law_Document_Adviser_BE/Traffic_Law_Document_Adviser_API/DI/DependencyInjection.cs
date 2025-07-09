@@ -170,7 +170,7 @@ namespace Traffic_Law_Document_Adviser_API.DI
             services.AddScoped<IDocumentCategoryService, DocumentCategoryService>();
             services.AddScoped<IDocumentTagService, DocumentTagService>();
 
-            services.AddScoped<IPhotoService, PhotoService>();
+            services.AddScoped<IPdfService, PdfService>();
         }
 
         //private static void AddOtherServices(this IServiceCollection services)
