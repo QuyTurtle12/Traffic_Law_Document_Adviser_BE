@@ -75,7 +75,7 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
         /// Create a new news
         /// </summary>
         [HttpPost]
-        [Authorize(Roles = RoleConstants.Expert)]
+        [Authorize(Roles = RoleConstants.Staff)]
         public async Task<IActionResult> CreateNews([FromBody] AddNewsDTO addNewsDTO)
         {
             var result = await _newsService.CreateNewsAsync(addNewsDTO);
@@ -92,7 +92,7 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
         /// Update an existing news
         /// </summary>
         [HttpPut("{id}")]
-        [Authorize(Roles = RoleConstants.Expert)]
+        [Authorize(Roles = RoleConstants.Staff)]
         public async Task<IActionResult> UpdateNews(Guid id, [FromBody] AddNewsDTO updateNewsDTO)
         {
             var result = await _newsService.UpdateNewsAsync(id, updateNewsDTO);
@@ -114,7 +114,7 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
         /// Delete a news
         /// </summary>
         [HttpDelete("{id}")]
-        [Authorize(Roles = RoleConstants.Expert)]
+        [Authorize(Roles = RoleConstants.Staff)]
         public async Task<IActionResult> DeleteNews(Guid id)
         {
             var result = await _newsService.DeleteNewsAsync(id);
@@ -132,7 +132,7 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
         // Sync news from external API
         // </summary>
         [HttpPost("sync")]
-        [Authorize(Roles = RoleConstants.Expert)]
+        [Authorize(Roles = RoleConstants.Staff)]
         public async Task<IActionResult> SyncNews()
         {
             var result = await _newsService.SyncNewsFromApiAsync();
