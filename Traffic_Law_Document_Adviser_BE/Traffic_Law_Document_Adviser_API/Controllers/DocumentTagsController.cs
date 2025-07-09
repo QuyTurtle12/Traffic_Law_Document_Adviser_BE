@@ -30,7 +30,7 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
         /// <param name="nameSearch">DocumentTag name</param>
         /// <param name="parentNameSearch">DocumentTag parent name</param>
         /// <returns></returns>
-        [Authorize(Roles = RoleConstants.Staff)]
+        [Authorize(Roles = $"{RoleConstants.Staff},{RoleConstants.Expert}")]
         [HttpGet]
         public async Task<IActionResult> GetPaginatedListAsync(int pageIndex = 1, int pageSize = 10, string? idSearch = null, string? nameSearch = null, string? parentNameSearch = null)
         {

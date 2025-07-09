@@ -23,7 +23,7 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetPaginatedCartsAsync(int pageIndex = 1, int pageSize = 10, Guid? idSearch = null, string? nameSearch = null)
+        public async Task<IActionResult> GetPaginatedCategoryAsync(int pageIndex = 1, int pageSize = 10, Guid? idSearch = null, string? nameSearch = null)
         {
             PaginatedList<GetDocumentCategoryDTO> result = await _documentCategoryService.GetPaginatedDocumentCategoriesAsync(pageIndex, pageSize, idSearch, nameSearch);
             return Ok(new BaseResponseModel<PaginatedList<GetDocumentCategoryDTO>>(
