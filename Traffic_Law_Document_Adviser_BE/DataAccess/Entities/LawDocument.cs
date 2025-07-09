@@ -14,3 +14,4 @@
         public virtual ICollection<DocumentTagMap>? DocumentTagMaps { get; set; }
     }
 }
+ 

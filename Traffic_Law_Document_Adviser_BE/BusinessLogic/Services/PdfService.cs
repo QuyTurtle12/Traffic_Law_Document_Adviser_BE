@@ -88,17 +88,10 @@ namespace BusinessLogic.Services
             return result.Result == "ok";
         }
 
-        public async Task<(Stream Stream, string ContentType)> DownloadFileAsync(string url)
-        {
-            using var httpClient = new HttpClient();
-            var response = await httpClient.GetAsync(url);
-            if (!response.IsSuccessStatusCode)
-                return (null, null);
+        public Task<(Stream Stream, string ContentType)> DownloadRawAsync(string url)
+            => GetImageAsync(url);
 
-            var contentType = response.Content.Headers.ContentType?.MediaType ?? "application/octet-stream";
-            var stream = await response.Content.ReadAsStreamAsync();
-            return (stream, contentType);
-        }
+
 
 
     }

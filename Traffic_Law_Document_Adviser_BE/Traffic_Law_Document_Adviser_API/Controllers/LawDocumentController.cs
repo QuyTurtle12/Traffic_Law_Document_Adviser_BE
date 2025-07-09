@@ -1,6 +1,7 @@
 ﻿using BusinessLogic.IServices;
 using DataAccess.Constant;
 using DataAccess.DTOs.LawDocumentDTOs;
+using DataAccess.ExceptionCustom;
 using DataAccess.PaginatedList;
 using DataAccess.ResponseModel;
 using Microsoft.AspNetCore.Authorization;
@@ -152,5 +153,46 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
                 message: "Law Document verified successfully."
             ));
         }
+
+        [HttpPost("upload")]
+        //[Authorize(Roles = RoleConstants.Staff)]
+        public async Task<IActionResult> UploadAndCreate(
+        [FromForm] CreateLawDocumentRequest request)
+        {
+            try
+            {
+                // map CreateLawDocumentRequest → AddLawDocumentDTO
+                var dto = new AddLawDocumentDTO
+                {
+                    Title = request.Title,
+                    DocumentCode = request.DocumentCode,
+                    CategoryId = request.CategoryId,
+                    ExpertVerification = false,
+                    TagList = request.TagList
+                };
+
+                // call your service
+                await _lawDocumentService.CreateLawDocumentWithUploadAsync(dto, request.File);
+
+                return StatusCode(StatusCodes.Status201Created,
+                    new BaseResponseModel<string>(
+                        StatusCodes.Status201Created,
+                        ResponseCodeConstants.SUCCESS,
+                        null,
+                        "Law document uploaded and created successfully."
+                    ));
+            }
+            catch (ErrorException ex)
+            {
+                return StatusCode(ex.StatusCode,
+                    new BaseResponseModel<string>(
+                        ex.StatusCode,
+                        ResponseCodeConstants.INTERNAL_SERVER_ERROR,
+                        null,
+                        ex.Message
+                    ));
+            }
+        }
+
     }
-}
+    }
