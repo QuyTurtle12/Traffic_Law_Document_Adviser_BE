@@ -15,14 +15,14 @@ namespace BusinessLogic.Services
 {
     public class LawDocumentService : ILawDocumentService
     {
-        private readonly IPhotoService _photoService;
+        private readonly IPdfService _photoService;
         private readonly IMapper _mapper;
         private readonly IUOW _unitOfWork;
         private readonly IAuthService _authService;
 
         // Constructor
         public LawDocumentService(
-            IPhotoService photoService,
+            IPdfService photoService,
             IMapper mapper,
             IUOW unitOfWork,
             IAuthService authService)
