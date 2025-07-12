@@ -76,6 +76,11 @@ namespace DataAccess.Entities
                       .WithOne(e => e.LawDocument)
                       .HasForeignKey(e => e.LawDocumentId)
                       .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.Expert)
+                      .WithMany(e => e.LawDocuments)
+                      .HasForeignKey(e => e.VerifyBy)
+                      .OnDelete(DeleteBehavior.Restrict);
             });
 
             // ChatDocument Configuration

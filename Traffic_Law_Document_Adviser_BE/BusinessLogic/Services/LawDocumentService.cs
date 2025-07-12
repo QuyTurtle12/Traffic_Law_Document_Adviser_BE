@@ -74,7 +74,9 @@ namespace BusinessLogic.Services
                 .Where(dc => !dc.DeletedTime.HasValue)
                 .Include(dc => dc.Category)
                 .Include(dc => dc.DocumentTagMaps)!
-                    .ThenInclude(dc => dc.Tag);
+                    .ThenInclude(dc => dc.Tag)
+                .Include(dc => dc.Expert);
+            
 
             // Apply id search filters if provided
             if (idSearch.HasValue)
@@ -142,6 +144,8 @@ namespace BusinessLogic.Services
                     Id = tagMap.DocumentTagId,
                     TagName = tagMap.Tag?.Name ?? string.Empty
                 }).ToList() ?? new List<GetDocumentTagMapDTO>();
+
+                lawDocumentDTO.VerifyBy = item.Expert?.Email ?? string.Empty;
 
                 return lawDocumentDTO;
             }).ToList();
@@ -313,8 +317,17 @@ namespace BusinessLogic.Services
 
             User? currentUser = await _authService.GetCurrentLoggedInUser();
 
+            // Check if the user is authenticated
+            if (currentUser == null)
+            {
+                throw new ErrorException(StatusCodes.Status401Unauthorized, ResponseCodeConstants.UNAUTHORIZED, "User is not authenticated.");
+            }
+
+            // Set the user who verified the document
+            lawDocument.VerifyBy = currentUser.Id;
+
             // Set the last updated information
-            lawDocument.LastUpdatedBy = currentUser?.Email ?? "System";
+            lawDocument.LastUpdatedBy = currentUser.Email;
             lawDocument.LastUpdatedTime = DateTime.Now;
 
             // Update the LawDocument in the database

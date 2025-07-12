@@ -11,5 +11,6 @@
         public virtual ICollection<Feedback>? Feedbacks { get; set; }
         public virtual ICollection<ChatHistory>? ChatHistories { get; set; }
         public virtual ICollection<News>? News { get; set; }
+        public virtual ICollection<LawDocument>? LawDocuments { get; set; }
     }
 }

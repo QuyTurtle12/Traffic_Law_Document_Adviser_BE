@@ -8,5 +8,6 @@ namespace DataAccess.DTOs.LawDocumentDTOs
         public string? CategoryName { get; set; }
         public IEnumerable<GetDocumentTagMapDTO>? TagList { get; set; }
         public bool ExpertVerification { get; set; }
+        public string? VerifyBy { get; set; }
     }
 }
