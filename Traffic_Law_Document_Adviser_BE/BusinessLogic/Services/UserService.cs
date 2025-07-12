@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using BusinessLogic.Helpers;
 using BusinessLogic.IServices;
 using DataAccess.Constant;
 using DataAccess.DTOs.UserDTOs;
@@ -61,8 +62,13 @@ namespace BusinessLogic.Services
                   "Email is already registered."
                 );
 
-            // 2. Map & insert
+            // 2. Map & insert with hashed password
             var userEntity = _mapper.Map<User>(dto);
+            userEntity.PasswordHash = PasswordHasher.Hash(dto.Password);
+            userEntity.Role = RoleConstants.ToRoleValue(dto.Role);
+            userEntity.CreatedTime = DateTime.UtcNow;
+            userEntity.IsActive = dto.IsActive;
+
             await repo.InsertAsync(userEntity);
             await _uow.SaveAsync();
 
@@ -100,6 +106,7 @@ namespace BusinessLogic.Services
 
             // Update other non-null properties via AutoMapper
             _mapper.Map(dto, user);
+            user.LastUpdatedTime = DateTime.UtcNow;
 
             // Save
             repo.Update(user);
