@@ -15,17 +15,52 @@ namespace BusinessLogic.Services
 {
     public class LawDocumentService : ILawDocumentService
     {
+        private readonly IPdfService _photoService;
         private readonly IMapper _mapper;
         private readonly IUOW _unitOfWork;
         private readonly IAuthService _authService;
 
         // Constructor
-        public LawDocumentService(IMapper mapper, IUOW uow, IAuthService authService)
+        public LawDocumentService(
+            IPdfService photoService,
+            IMapper mapper,
+            IUOW unitOfWork,
+            IAuthService authService)
         {
+            _photoService = photoService;
             _mapper = mapper;
-            _unitOfWork = uow;
+            _unitOfWork = unitOfWork;
             _authService = authService;
         }
+
+        public async Task CreateLawDocumentWithUploadAsync(AddLawDocumentDTO dto, IFormFile file)
+        {
+            // 1) check for PDF
+            if (file == null || file.Length == 0)
+                throw new ErrorException(StatusCodes.Status400BadRequest,
+                    ResponseCodeConstants.BADREQUEST,
+                    "A PDF file is required.");
+
+            var ext = Path.GetExtension(file.FileName);
+            if (!string.Equals(ext, ".pdf", StringComparison.OrdinalIgnoreCase))
+                throw new ErrorException(StatusCodes.Status400BadRequest,
+                    ResponseCodeConstants.BADREQUEST,
+                    "Only PDF files are allowed.");
+
+            // 2) upload to Cloudinary
+            var publicName = Path.GetFileNameWithoutExtension(file.FileName);
+            var url = await _photoService.UploadImageAsync(file, publicName);
+
+            if (url == null)
+                throw new ErrorException(StatusCodes.Status500InternalServerError,
+                    ResponseCodeConstants.INTERNAL_SERVER_ERROR,
+                    "Failed to upload PDF to Cloudinary.");
+
+            // 3) set linkPath & create law document
+            dto.LinkPath = url;
+            await CreateLawDocument(dto);
+        }
+
 
         public async Task<PaginatedList<GetLawDocumentDTO>> GetPaginatedLawDocumentsAsync(int pageIndex, int pageSize, Guid? idSearch, string? titleSearch, string? documentCodeSearch,
             string? categoryNameSearch, string? filePathSearch, string? linkPathSearch, bool? expertVerificationSearch, string[]? tagIdSearch)
@@ -39,7 +74,9 @@ namespace BusinessLogic.Services
                 .Where(dc => !dc.DeletedTime.HasValue)
                 .Include(dc => dc.Category)
                 .Include(dc => dc.DocumentTagMaps)!
-                    .ThenInclude(dc => dc.Tag);
+                    .ThenInclude(dc => dc.Tag)
+                .Include(dc => dc.Expert);
+            
 
             // Apply id search filters if provided
             if (idSearch.HasValue)
@@ -107,6 +144,8 @@ namespace BusinessLogic.Services
                     Id = tagMap.DocumentTagId,
                     TagName = tagMap.Tag?.Name ?? string.Empty
                 }).ToList() ?? new List<GetDocumentTagMapDTO>();
+
+                lawDocumentDTO.VerifyBy = item.Expert?.Email ?? string.Empty;
 
                 return lawDocumentDTO;
             }).ToList();
@@ -278,8 +317,17 @@ namespace BusinessLogic.Services
 
             User? currentUser = await _authService.GetCurrentLoggedInUser();
 
+            // Check if the user is authenticated
+            if (currentUser == null)
+            {
+                throw new ErrorException(StatusCodes.Status401Unauthorized, ResponseCodeConstants.UNAUTHORIZED, "User is not authenticated.");
+            }
+
+            // Set the user who verified the document
+            lawDocument.VerifyBy = currentUser.Id;
+
             // Set the last updated information
-            lawDocument.LastUpdatedBy = currentUser?.Email ?? "System";
+            lawDocument.LastUpdatedBy = currentUser.Email;
             lawDocument.LastUpdatedTime = DateTime.Now;
 
             // Update the LawDocument in the database
