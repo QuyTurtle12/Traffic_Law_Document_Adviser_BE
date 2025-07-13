@@ -145,7 +145,7 @@ namespace BusinessLogic.Services
         public Task<User?> GetCurrentLoggedInUser()
         {
             // Get the current user's ID from the JWT claims
-            string? currentId = _httpContextAccessor.HttpContext?.User?.FindFirst("Sub")?.Value;
+            string? currentId = _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
 
             // If no ID is found, return null
             if (string.IsNullOrWhiteSpace(currentId)) return Task.FromResult<User?>(null);
