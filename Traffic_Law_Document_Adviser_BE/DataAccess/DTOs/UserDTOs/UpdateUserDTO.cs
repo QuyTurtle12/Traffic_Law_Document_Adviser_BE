@@ -18,7 +18,7 @@ namespace DataAccess.DTOs.UserDTOs
         [EmailAddress]
         public string? Email { get; set; }
 
-        [RegularExpression("^(User|Expert|Admin)$", ErrorMessage = "Role must be User, Expert, or Admin.")]
+        [RegularExpression("^(User|Expert|Admin|Staff)$", ErrorMessage = "Role must be User, Expert, Staff or Admin.")]
         public string? Role { get; set; }
 
         public bool? IsActive { get; set; }
