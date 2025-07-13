@@ -28,7 +28,7 @@ namespace DataAccess.DTOs.UserDTOs
         public string ConfirmPassword { get; set; } = null!;
 
         [Required]
-        [RegularExpression("^(User|Expert|Admin)$", ErrorMessage = "Role must be User, Expert, or Admin.")]
+        [RegularExpression("^(User|Expert|Staff|Admin)$", ErrorMessage = "Role must be User, Expert,Staff or Admin.")]
         public string Role { get; set; } = null!;
 
         public bool IsActive { get; set; } = true;
