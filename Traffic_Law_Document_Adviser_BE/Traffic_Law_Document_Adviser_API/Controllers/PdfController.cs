@@ -78,7 +78,7 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
             return Ok(response);
         }
         [HttpDelete]
-        public async Task<IActionResult> DelteImage([FromQuery] string url)
+        public async Task<IActionResult> DeleteImage([FromQuery] string url)
         {
             BaseResponseModel response;
             var result = await _photoService.DeleteImageAsync(url);
