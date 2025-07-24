@@ -8,6 +8,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add config for Cloudinary settings
 builder.Services.Configure<CloudinarySettings>(
     builder.Configuration.GetSection("CloudinarySettings"));
+// Add HttpClient for Gemini api
+builder.Services.AddHttpClient();
 // Add services to the container.
 
 builder.Services.AddControllers();

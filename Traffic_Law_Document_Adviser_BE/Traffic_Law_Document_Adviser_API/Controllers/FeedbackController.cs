@@ -9,7 +9,7 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class FeedbackController : ControllerBase
     {
         private readonly IFeedbackService _feedbackService;
@@ -73,7 +73,7 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
             await _feedbackService.UpdateFeedbackAsync(putFeedbackDto);
             return NoContent();
         }*/
-        [HttpDelete("{feedbackId}")]
+        /*[HttpDelete("{feedbackId}")]
         public async Task<IActionResult> DeleteFeedbackAsync(Guid feedbackId)
         {
             var result = await _feedbackService.DeleteFeedbackAsync(feedbackId);
@@ -97,8 +97,9 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
                 message: "Delete feedback success."
                 );
             return Ok(response);
-        }
+        }*/
         [HttpGet("all")]
+        [Authorize(Roles = RoleConstants.Staff)]
         public async Task<IActionResult> GetAllFeedbacksAsync(int page = 1, int pageSize = 10)
         {
             var feedbacks = await _feedbackService.GetAllFeedbacksAsync(page, pageSize);

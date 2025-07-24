@@ -2,13 +2,14 @@
 using DataAccess.Constant;
 using DataAccess.DTOs.ChatHistoryDTOs;
 using DataAccess.ResponseModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Traffic_Law_Document_Adviser_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class ChatHistoryController : ControllerBase
     {
         private readonly IChatHistoryService _chatHistoryService;
