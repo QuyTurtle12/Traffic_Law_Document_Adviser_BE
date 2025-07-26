@@ -39,6 +39,14 @@ namespace BusinessLogic.Services
             // Check if email already exists
             var userRepo = _unitOfWork.GetRepository<User>();
             bool emailExists = userRepo.Entities.Any(u => u.Email == dto.Email);
+            if (string.IsNullOrWhiteSpace(dto.Email) || !dto.Email.EndsWith("@gmail.com", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new ErrorException(
+                    StatusCodes.Status400BadRequest,
+                    "INVALID_EMAIL",
+                    "Only @gmail.com emails are allowed."
+                );
+            }
             if (emailExists)
                 throw new ErrorException(
                   StatusCodes.Status400BadRequest,
