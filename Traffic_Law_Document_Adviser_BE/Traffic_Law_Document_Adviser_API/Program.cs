@@ -25,6 +25,7 @@ builder.Services.AddAutoMapper(config =>
     config.CreateMap<AddNewsDTO, News>();
 });
 
+//builder.WebHost.UseUrls("http://*:4000");
 
 var app = builder.Build();
 
