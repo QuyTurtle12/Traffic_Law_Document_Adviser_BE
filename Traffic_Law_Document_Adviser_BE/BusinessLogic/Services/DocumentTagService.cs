@@ -114,6 +114,21 @@ namespace BusinessLogic.Services
 
         public async Task AddAsync(AddDocumentTagDTO documentTagDto)
         {
+            // check Tag Name existence
+            bool isTagNameExist = await _unitOfWork.GetRepository<DocumentTag>()
+                .Entities
+                .AnyAsync(dt =>
+                EF.Functions.Collate(dt.Name!, "Latin1_General_CS_AS") == documentTagDto.Name &&
+                !dt.DeletedTime.HasValue);
+
+            if (isTagNameExist)
+            {
+                throw new ErrorException(
+                    StatusCodes.Status409Conflict,
+                    ResponseCodeConstants.EXISTED,
+                    $"A document tag with name '{documentTagDto.Name}' already exists.");
+            }
+
             // If ParentTagId is provided, validate it
             if (documentTagDto.ParentTagId.HasValue)
             {
@@ -122,6 +137,7 @@ namespace BusinessLogic.Services
                     .Where(dt => dt.Id == documentTagDto.ParentTagId && !dt.DeletedTime.HasValue)
                     .Include(dt => dt.ParentTag)
                     .FirstOrDefaultAsync();
+
 
                 if (parentTag == null)
                 {
@@ -140,6 +156,8 @@ namespace BusinessLogic.Services
                         "Cannot create a cyclic relationship in the tag hierarchy.");
                 }
             }
+
+           
 
             // Map the DTO to DocumentTag entity
             DocumentTag documentTag = _mapper.Map<DocumentTag>(documentTagDto);
@@ -192,6 +210,21 @@ namespace BusinessLogic.Services
                     StatusCodes.Status404NotFound,
                     ResponseCodeConstants.NOT_FOUND,
                     $"Document tag with id {id} was not found");
+            }
+
+            // check Tag Name existence
+            bool isTagNameExist = await _unitOfWork.GetRepository<DocumentTag>()
+                .Entities
+                .AnyAsync(dt =>
+                EF.Functions.Collate(dt.Name!, "Latin1_General_CS_AS") == documentTagDto.Name &&
+                !dt.DeletedTime.HasValue);
+
+            if (isTagNameExist)
+            {
+                throw new ErrorException(
+                    StatusCodes.Status409Conflict,
+                    ResponseCodeConstants.EXISTED,
+                    $"A document tag with name '{documentTagDto.Name}' already exists.");
             }
 
             // If ParentTagId is provided and different from current

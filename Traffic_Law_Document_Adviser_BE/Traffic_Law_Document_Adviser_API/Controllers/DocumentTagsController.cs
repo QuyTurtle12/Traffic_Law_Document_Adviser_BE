@@ -69,7 +69,7 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
         /// </summary>
         /// <param name="documentTagDTO"></param>
         /// <returns></returns>
-        [Authorize(Roles = RoleConstants.Staff)]
+       // [Authorize(Roles = RoleConstants.Staff)]
         [HttpPost]
         public async Task<IActionResult> PostAsync(AddDocumentTagDTO documentTagDTO)
         {
@@ -88,7 +88,7 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
         /// <param name="id">DocumentTag id</param>
         /// <param name="documentTagDTO"></param>
         /// <returns></returns>
-        [Authorize(Roles = RoleConstants.Staff)]
+      //  [Authorize(Roles = RoleConstants.Staff)]
         [HttpPut]
         [Route("{id}")]
         public async Task<IActionResult> PutAsync(Guid id, UpdateDocumentTagDTO documentTagDTO)

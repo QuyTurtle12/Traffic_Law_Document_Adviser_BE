@@ -2,6 +2,7 @@
 using BusinessLogic.Services;
 using DataAccess.Constant;
 using DataAccess.DTOs.DocumentCategoryDTOs;
+using DataAccess.ExceptionCustom;
 using DataAccess.PaginatedList;
 using DataAccess.ResponseModel;
 using Microsoft.AspNetCore.Authorization;
@@ -35,7 +36,7 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = RoleConstants.Staff)]
+        // [Authorize(Roles = RoleConstants.Staff)]
         public async Task<IActionResult> PostDocumentCategoryAsync(AddDocumentCategoryDTO DocumentCategoryDTO)
         {
             if (DocumentCategoryDTO == null)
@@ -59,6 +60,16 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
                     message: "Document Category created successfully."
                 ));
             }
+            catch (ErrorException ex)
+            {
+                // Return meaningful error to client (e.g., duplicate code)
+                return StatusCode(ex.StatusCode, new BaseResponseModel<string>(
+                    statusCode: ex.StatusCode,
+                    code: ResponseCodeConstants.DUPLICATE,
+                    data: null,
+                    message: ex.Message
+                ));
+            }
             catch (Exception ex)
             {
                 // Optional: Log the error
@@ -72,7 +83,7 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize(Roles = RoleConstants.Staff)]
+     //    [Authorize(Roles = RoleConstants.Staff)]
         public async Task<IActionResult> UpdateDocumentCategoryAsync(Guid id, [FromBody] UpdateDocumentCategoryDTO DocumentCategoryDTO)
         {
             if (DocumentCategoryDTO == null)
@@ -94,6 +105,16 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
                     code: ResponseCodeConstants.SUCCESS,
                     data: null,
                     message: "Document Category updated successfully."
+                ));
+            }
+            catch (ErrorException ex)
+            {
+                // Return meaningful error to client (e.g., duplicate code)
+                return StatusCode(ex.StatusCode, new BaseResponseModel<string>(
+                    statusCode: ex.StatusCode,
+                    code: ResponseCodeConstants.DUPLICATE,
+                    data: null,
+                    message: ex.Message
                 ));
             }
             catch (Exception ex)
