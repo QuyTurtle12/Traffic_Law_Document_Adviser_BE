@@ -173,6 +173,26 @@ namespace BusinessLogic.Services
                 throw new ErrorException(StatusCodes.Status400BadRequest, ResponseCodeConstants.BADREQUEST, "Law document data is required!");
             }
 
+            // Check for existing DocumentCode
+            // This cant create in case. StrinG2 cant be created when string2 exists
+            //bool isDocumentCodeExist = await _unitOfWork.GetRepository<LawDocument>()
+            //    .Entities
+            //    .AnyAsync(ld =>
+            //        ld.DocumentCode.ToLower() == lawDocumentDTO.DocumentCode!.ToLower() &&
+            //        !ld.DeletedTime.HasValue);
+
+            // This can create in case. StrinG2 cant be created when string2 exists
+            bool isDocumentCodeExist = await _unitOfWork.GetRepository<LawDocument>()
+                .Entities
+                .AnyAsync(ld =>
+                    EF.Functions.Collate(ld.DocumentCode, "Latin1_General_CS_AS") == lawDocumentDTO.DocumentCode &&
+                    !ld.DeletedTime.HasValue);
+
+            if (isDocumentCodeExist)
+            {
+                throw new ErrorException(StatusCodes.Status409Conflict, ResponseCodeConstants.EXISTED, "A law document with the same DocumentCode already exists.");
+            }
+
             LawDocument lawDocument = _mapper.Map<LawDocument>(lawDocumentDTO);
             lawDocument.CreatedBy = "System";
             lawDocument.CreatedTime = DateTime.Now;
@@ -213,6 +233,19 @@ namespace BusinessLogic.Services
             if (existingLawDocument == null)
             {
                 throw new ErrorException(StatusCodes.Status404NotFound, ResponseCodeConstants.BADREQUEST, "Law Document not found!");
+            }
+
+            // Check for existing DocumentCode
+            bool isDocumentCodeExist = await _unitOfWork.GetRepository<LawDocument>()
+                .Entities
+                .AnyAsync(ld =>
+                    ld.Id != id &&
+                    EF.Functions.Collate(ld.DocumentCode, "Latin1_General_CS_AS") == lawDocumentDTO.DocumentCode &&
+                    !ld.DeletedTime.HasValue);
+
+            if (isDocumentCodeExist)
+            {
+                throw new ErrorException(StatusCodes.Status409Conflict, ResponseCodeConstants.EXISTED, "A law document with the same DocumentCode already exists.");
             }
 
             // Map the DTO to the existing LawDocument entity
