@@ -55,7 +55,7 @@ namespace BusinessLogic.Services
             var repo = _uow.GetRepository<User>();
 
             // 1. Duplicate email?
-            if (repo.Entities.Any(u => u.Email == dto.Email))
+            if (repo.Entities.Any(u => u.Email == dto.Email && !u.DeletedTime.HasValue))
                 throw new ErrorException(
                   StatusCodes.Status400BadRequest,
                   "EMAIL_EXISTS",
@@ -89,7 +89,7 @@ namespace BusinessLogic.Services
             // If email changed, check uniqueness
             if (!string.IsNullOrWhiteSpace(dto.Email)
                 && dto.Email != user.Email
-                && repo.Entities.Any(u => u.Email == dto.Email && u.Id != dto.Id))
+                && repo.Entities.Any(u => u.Email == dto.Email && u.Id != dto.Id && !u.DeletedTime.HasValue))
             {
                 throw new ErrorException(
                   StatusCodes.Status400BadRequest,
