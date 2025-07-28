@@ -146,7 +146,7 @@ namespace BusinessLogic.Services
             var response = await _http.PostAsJsonAsync(apiUrl, new { question = prompt });
             var result = await response.Content.ReadAsStringAsync();
 
-            return result;
+            return "Not implement yet";
         }
     }
 }
