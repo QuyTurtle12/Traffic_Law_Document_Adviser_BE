@@ -86,6 +86,17 @@ namespace BusinessLogic.Services
                 throw new ErrorException(StatusCodes.Status400BadRequest, ResponseCodeConstants.BADREQUEST, "Document Category data is required!");
             }
 
+            bool isCategoryNameExist = await _unitOfWork.GetRepository<DocumentCategory>()
+                 .Entities
+                 .AnyAsync(dc =>
+                 EF.Functions.Collate(dc.Name!, "Latin1_General_CS_AS") == documentCategoryDTO.Name &&
+                 !dc.DeletedTime.HasValue);
+
+            if (isCategoryNameExist)
+            {
+                throw new ErrorException(StatusCodes.Status409Conflict, ResponseCodeConstants.EXISTED,
+                    $"A document category with name '{documentCategoryDTO.Name}' already exists.");
+            }
 
             DocumentCategory DocumentCategory = _mapper.Map<DocumentCategory>(documentCategoryDTO);
             DocumentCategory.CreatedBy = "System";
@@ -102,6 +113,19 @@ namespace BusinessLogic.Services
             if (existingDocumentCategory == null)
             {
                 throw new ErrorException(StatusCodes.Status404NotFound, ResponseCodeConstants.BADREQUEST, "Document Category not found!");
+            }
+
+            bool isCategoryNameExist = await _unitOfWork.GetRepository<DocumentCategory>()
+                 .Entities
+                 .AnyAsync(dc =>
+                 dc.Id != id &&
+                 EF.Functions.Collate(dc.Name!, "Latin1_General_CS_AS") == documentCategoryDTO.Name &&
+                 !dc.DeletedTime.HasValue);
+
+            if (isCategoryNameExist)
+            {
+                throw new ErrorException(StatusCodes.Status409Conflict, ResponseCodeConstants.EXISTED,
+                    $"A document category with name '{documentCategoryDTO.Name}' already exists.");
             }
 
             DocumentCategory DocumentCategory = _mapper.Map(documentCategoryDTO, existingDocumentCategory);

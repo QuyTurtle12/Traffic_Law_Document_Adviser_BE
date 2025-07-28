@@ -60,6 +60,16 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
                     message: "Law Document created successfully."
                 ));
             }
+            catch (ErrorException ex)
+            {
+                // Return meaningful error to client (e.g., duplicate code)
+                return StatusCode(ex.StatusCode, new BaseResponseModel<string>(
+                    statusCode: ex.StatusCode,
+                    code: ResponseCodeConstants.DUPLICATE,
+                    data: null,
+                    message: ex.Message
+                ));
+            }
             catch (Exception ex)
             {
                 // Optional: Log the error
@@ -95,6 +105,16 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
                     code: ResponseCodeConstants.SUCCESS,
                     data: null,
                     message: "Law document updated successfully."
+                ));
+            }
+            catch (ErrorException ex)
+            {
+                // Return meaningful error to client (e.g., duplicate code)
+                return StatusCode(ex.StatusCode, new BaseResponseModel<string>(
+                    statusCode: ex.StatusCode,
+                    code: ResponseCodeConstants.DUPLICATE,
+                    data: null,
+                    message: ex.Message
                 ));
             }
             catch (Exception ex)
