@@ -2,13 +2,14 @@
 using DataAccess.Constant;
 using DataAccess.DTOs.ChatHistoryDTOs;
 using DataAccess.ResponseModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Traffic_Law_Document_Adviser_API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class ChatHistoryController : ControllerBase
     {
         private readonly IChatHistoryService _chatHistoryService;
@@ -55,9 +56,9 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
             return Ok(response);
         }
         [HttpPost]
-        public async Task<IActionResult> CreateChatHistoryAsync([FromBody] PostChatHistoryDto postChatHistoryDto)
+        public async Task<IActionResult> CreateChatHistoryAsync([FromBody] PostChatHistoryDto postChatHistoryDto, [FromQuery] string modelName)
         {
-            var result = await _chatHistoryService.CreateChatHistoryAsync(postChatHistoryDto);
+            var result = await _chatHistoryService.CreateChatHistoryAsync(postChatHistoryDto, modelName);
             BaseResponseModel response;
 
             if (result == Guid.Empty)

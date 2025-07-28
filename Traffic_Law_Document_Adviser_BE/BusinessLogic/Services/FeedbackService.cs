@@ -13,8 +13,8 @@ namespace BusinessLogic.Services
         private readonly IUOW _unitOfWork;
         public FeedbackService(IMapper mapper, IUOW uow)
         {
-                    _mapper = mapper;
-                    _unitOfWork = uow;
+            _mapper = mapper;
+            _unitOfWork = uow;
         }
         public async Task<bool> CreateFeedbackAsync(PostFeedbackDto postFeedbackDto)
         {
@@ -45,6 +45,7 @@ namespace BusinessLogic.Services
             IEnumerable<Feedback> feedbackList = await _unitOfWork.GetRepository<Feedback>()
                 .Entities
                 .Where(f => Guid.Equals(f.UserId, userId) && f.DeletedTime == null)
+                .Include(f => f.User)
                 .OrderByDescending(f => f.CreatedTime)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
@@ -57,6 +58,7 @@ namespace BusinessLogic.Services
             Feedback? feedback = await _unitOfWork.GetRepository<Feedback>()
                 .Entities
                 .Where(f => Guid.Equals(f.Id, feedbackId) && f.DeletedTime == null)
+                .Include(f => f.User)
                 .FirstOrDefaultAsync();
             
             return feedback != null ? _mapper.Map<GetFeedbackDto>(feedback) : null;
@@ -82,6 +84,7 @@ namespace BusinessLogic.Services
             IEnumerable<Feedback> feedbackList = await _unitOfWork.GetRepository<Feedback>()
                 .Entities
                 .Where(f => f.DeletedTime == null)
+                .Include(f => f.User)
                 .OrderByDescending(f => f.CreatedTime)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)

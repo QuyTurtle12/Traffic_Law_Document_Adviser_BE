@@ -8,9 +8,12 @@ namespace BusinessLogic.MappingProfiles
     {
         public FeedbackProfile()
         {
-            CreateMap<Feedback, GetFeedbackDto>().ReverseMap();
+            CreateMap<Feedback, GetFeedbackDto>()
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.User.Email))
+                .ReverseMap();
             CreateMap<Feedback, PostFeedbackDto>().ReverseMap();
             CreateMap<Feedback, PutFeedbackDto>().ReverseMap();
+            
         }
     }
 }
