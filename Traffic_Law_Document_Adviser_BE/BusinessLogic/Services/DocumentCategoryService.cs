@@ -118,6 +118,7 @@ namespace BusinessLogic.Services
             bool isCategoryNameExist = await _unitOfWork.GetRepository<DocumentCategory>()
                  .Entities
                  .AnyAsync(dc =>
+                 dc.Id != id &&
                  EF.Functions.Collate(dc.Name!, "Latin1_General_CS_AS") == documentCategoryDTO.Name &&
                  !dc.DeletedTime.HasValue);
 

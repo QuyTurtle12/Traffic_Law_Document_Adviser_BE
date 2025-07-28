@@ -216,6 +216,7 @@ namespace BusinessLogic.Services
             bool isTagNameExist = await _unitOfWork.GetRepository<DocumentTag>()
                 .Entities
                 .AnyAsync(dt =>
+                dt.Id != id &&
                 EF.Functions.Collate(dt.Name!, "Latin1_General_CS_AS") == documentTagDto.Name &&
                 !dt.DeletedTime.HasValue);
 

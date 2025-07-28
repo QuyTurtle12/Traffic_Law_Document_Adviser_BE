@@ -239,6 +239,7 @@ namespace BusinessLogic.Services
             bool isDocumentCodeExist = await _unitOfWork.GetRepository<LawDocument>()
                 .Entities
                 .AnyAsync(ld =>
+                    ld.Id != id &&
                     EF.Functions.Collate(ld.DocumentCode, "Latin1_General_CS_AS") == lawDocumentDTO.DocumentCode &&
                     !ld.DeletedTime.HasValue);
 

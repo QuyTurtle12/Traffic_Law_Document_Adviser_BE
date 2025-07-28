@@ -36,7 +36,7 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
         }
 
         [HttpPost]
-        // [Authorize(Roles = RoleConstants.Staff)]
+        [Authorize(Roles = RoleConstants.Staff)]
         public async Task<IActionResult> PostDocumentCategoryAsync(AddDocumentCategoryDTO DocumentCategoryDTO)
         {
             if (DocumentCategoryDTO == null)
@@ -83,7 +83,7 @@ namespace Traffic_Law_Document_Adviser_API.Controllers
         }
 
         [HttpPut("{id}")]
-     //    [Authorize(Roles = RoleConstants.Staff)]
+        [Authorize(Roles = RoleConstants.Staff)]
         public async Task<IActionResult> UpdateDocumentCategoryAsync(Guid id, [FromBody] UpdateDocumentCategoryDTO DocumentCategoryDTO)
         {
             if (DocumentCategoryDTO == null)
