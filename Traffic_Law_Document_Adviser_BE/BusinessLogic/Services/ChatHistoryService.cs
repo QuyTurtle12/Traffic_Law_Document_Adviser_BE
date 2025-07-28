@@ -140,11 +140,11 @@ namespace BusinessLogic.Services
         }
         private async Task<string> AnswerFromMyLLM(string question)
         {
-            string apiUrl = "http://127.0.0.1:8000/ask";
-            string prompt = "Bạn là một trợ lý luật giao thông Việt Nam. Trả lời câu hỏi bằng tiếng Việt chỉ sử dụng văn bản thuần túy. Không sử dụng Markdown, dấu đầu dòng, dấu hoa thị (*) hay bất kỳ định dạng đặc biệt nào.\n\n" + "Câu hỏi: " + question + "\n\n" + "Trả lời:";
+            //string apiUrl = "http://127.0.0.1:8000/ask";
+            //string prompt = "Bạn là một trợ lý luật giao thông Việt Nam. Trả lời câu hỏi bằng tiếng Việt chỉ sử dụng văn bản thuần túy. Không sử dụng Markdown, dấu đầu dòng, dấu hoa thị (*) hay bất kỳ định dạng đặc biệt nào.\n\n" + "Câu hỏi: " + question + "\n\n" + "Trả lời:";
 
-            var response = await _http.PostAsJsonAsync(apiUrl, new { question = prompt });
-            var result = await response.Content.ReadAsStringAsync();
+            //var response = await _http.PostAsJsonAsync(apiUrl, new { question = prompt });
+            //var result = await response.Content.ReadAsStringAsync();
 
             return "Not implement yet";
         }
