@@ -16,6 +16,9 @@ namespace DataAccess.DTOs.UserDTOs
         public string? FullName { get; set; }
 
         [EmailAddress]
+        [RegularExpression(
+          @"^[a-zA-Z0-9._%+-]+@gmail\.com$", ErrorMessage = "Email must be a valid Gmail address."
+        )]
         public string? Email { get; set; }
 
         [RegularExpression("^(User|Expert|Admin|Staff)$", ErrorMessage = "Role must be User, Expert, Staff or Admin.")]

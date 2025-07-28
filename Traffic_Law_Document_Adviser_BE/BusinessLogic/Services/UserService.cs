@@ -108,10 +108,13 @@ namespace BusinessLogic.Services
             _mapper.Map(dto, user);
             user.LastUpdatedTime = DateTime.UtcNow;
 
-            // save isActive
             if (dto.IsActive.HasValue)
             {
                 user.IsActive = dto.IsActive.Value;
+            }
+            else
+            {
+                user.IsActive = true;
             }
 
             // Save
