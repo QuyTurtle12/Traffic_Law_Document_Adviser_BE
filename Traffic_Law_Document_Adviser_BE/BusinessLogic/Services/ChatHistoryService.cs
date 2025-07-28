@@ -1,12 +1,11 @@
 ﻿using AutoMapper;
-using Azure;
-using Azure.AI.Inference;
 using BusinessLogic.IServices;
 using DataAccess.DTOs.ChatHistoryDTOs;
 using DataAccess.Entities;
 using DataAccess.IRepositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using System.Net.Http.Json;
 using System.Text;
 
 namespace BusinessLogic.Services
@@ -16,16 +15,25 @@ namespace BusinessLogic.Services
         private readonly IMapper _mapper;
         private readonly IUOW _unitOfWork;
         private readonly IConfiguration _configuration;
+        private readonly HttpClient _http;
 
-        public ChatHistoryService(IMapper mapper, IUOW uow, IConfiguration configuration)
+        public ChatHistoryService(IMapper mapper, IUOW uow, IConfiguration configuration, HttpClient http)
         {
             _mapper = mapper;
             _unitOfWork = uow;
             _configuration = configuration;
+            _http = http;
         }
-        public async Task<Guid> CreateChatHistoryAsync(PostChatHistoryDto postChatHistoryDto)
+        public async Task<Guid> CreateChatHistoryAsync(PostChatHistoryDto postChatHistoryDto, string modelName)
         {
-            postChatHistoryDto.Answer = await AnswerFromGemini(postChatHistoryDto.Question);
+            if (modelName == "law-document")
+            {
+                postChatHistoryDto.Answer = await AnswerFromMyLLM(postChatHistoryDto.Question);
+            }
+            else if (modelName == "gemini-2.5-pro")
+            {
+                postChatHistoryDto.Answer = await AnswerFromGemini(postChatHistoryDto.Question);
+            }
             ChatHistory newChatHistory = _mapper.Map<ChatHistory>(postChatHistoryDto);
             newChatHistory.CreatedTime = DateTime.Now;
             Guid id = newChatHistory.Id;
@@ -72,40 +80,6 @@ namespace BusinessLogic.Services
                 .ToListAsync();
                 
             return _mapper.Map<IEnumerable<GetChatHistoryDto>>(chatHistoryList);
-        }
-        private async Task<string> AnswerFromDeepseek(string question)
-        {
-            string prompt = "You are an Vietnamese traffic law assistant. Answer the question in Vietnamese and don't use Markdown. You just need to focus on the main point.\n\n" +
-                "Question: " + question + "\n\n" +
-                "Answer:";
-            var endpoint = new Uri("https://models.github.ai/inference");
-            var credential = new AzureKeyCredential(_configuration["Github:Token"]);
-            var model = "deepseek/DeepSeek-R1-0528";
-
-            var client = new ChatCompletionsClient(
-                endpoint,
-                credential);
-
-            var requestOptions = new ChatCompletionsOptions()
-            {
-                Messages =
-                {
-                    new ChatRequestUserMessage(prompt),
-                },
-                MaxTokens = 2048,
-                Model = model
-            };
-
-            Response<ChatCompletions> response = await client.CompleteAsync(requestOptions);
-            string answer = response.Value.Choices[0].Message.Content;
-
-            // Remove the <think> tag and its content
-            int thinkEnd = answer.IndexOf("</think>");
-            if (thinkEnd >= 0)
-            {
-                answer = answer.Substring(thinkEnd + "</think>".Length).TrimStart();
-            }
-            return answer;
         }
         private async Task<string> AnswerFromGemini(string question)
         {
@@ -164,6 +138,15 @@ namespace BusinessLogic.Services
                 return "Failed to parse response.";
             }
         }
+        private async Task<string> AnswerFromMyLLM(string question)
+        {
+            string apiUrl = "http://127.0.0.1:8000/ask";
+            string prompt = "Bạn là một trợ lý luật giao thông Việt Nam. Trả lời câu hỏi bằng tiếng Việt chỉ sử dụng văn bản thuần túy. Không sử dụng Markdown, dấu đầu dòng, dấu hoa thị (*) hay bất kỳ định dạng đặc biệt nào.\n\n" + "Câu hỏi: " + question + "\n\n" + "Trả lời:";
 
+            var response = await _http.PostAsJsonAsync(apiUrl, new { question = prompt });
+            var result = await response.Content.ReadAsStringAsync();
+
+            return result;
+        }
     }
 }
