@@ -10,6 +10,8 @@ namespace DataAccess.DTOs.FeedbackDTOs
         public string? AIAnswer { get; set; }
         public string? Content { get; set; }
         public DateTime CreatedTime { get; set; }
+        //show properties
+        public string? Email { get; set; }
     }
     public class PostFeedbackDto
     {
